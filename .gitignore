@@ -1,0 +1,17 @@
+# مولَّدة تلقائياً في GitHub Actions — لا ترفعها
+node_modules/
+android/
+ios/
+
+# ملفات النظام
+.DS_Store
+Thumbs.db
+
+# Keystore — لا تُرفع أبداً
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.vscode/
