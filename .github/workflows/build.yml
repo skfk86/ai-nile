@@ -30,7 +30,6 @@ jobs:
       - name: Install packages
         run: npm install
 
-      # ── www folder ────────────────────────────────────────────
       - name: Prepare www folder
         run: |
           mkdir -p www
@@ -42,22 +41,37 @@ jobs:
       - name: Sync web assets
         run: npx cap sync android
 
-      # ── أيقونة التطبيق (الطريقة الرسمية) ─────────────────────
+      # ── أيقونة التطبيق ────────────────────────────────────────
       - name: Generate app icons
         run: |
-          mkdir -p assets
-          # نسخ الأيقونة وإنشاء الأحجام المطلوبة
-          cp icon.png assets/icon.png
-          cp icon.png assets/icon-foreground.png
-          # توليد جميع أحجام الأيقونة لـ Android بما فيها Adaptive Icons
-          npx @capacitor/assets generate \
-            --assetPath assets \
-            --androidProject android \
-            --ios false
-          echo "✓ Icons generated"
+          sudo apt-get install -y imagemagick
+
+          # توليد جميع أحجام PNG
+          declare -A sizes=(
+            ["mipmap-mdpi"]=48
+            ["mipmap-hdpi"]=72
+            ["mipmap-xhdpi"]=96
+            ["mipmap-xxhdpi"]=144
+            ["mipmap-xxxhdpi"]=192
+          )
+          for dir in "${!sizes[@]}"; do
+            size=${sizes[$dir]}
+            mkdir -p android/app/src/main/res/$dir
+            convert icon.png -resize ${size}x${size} \
+              android/app/src/main/res/$dir/ic_launcher.png
+            convert icon.png -resize ${size}x${size} \
+              android/app/src/main/res/$dir/ic_launcher_round.png
+          done
+
+          # حذف Adaptive Icons حتى يستخدم Android ملفات PNG مباشرة
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26/
+          rm -f  android/app/src/main/res/drawable/ic_launcher_foreground.xml
+          rm -f  android/app/src/main/res/drawable/ic_launcher_background.xml
+
+          echo "✓ Icons done"
           ls android/app/src/main/res/mipmap-xxhdpi/
 
-      # ── رقم الإصدار التلقائي ──────────────────────────────────
+      # ── رقم الإصدار ───────────────────────────────────────────
       - name: Set version
         run: |
           VERSION_CODE=$(git rev-list --count HEAD)
@@ -66,13 +80,13 @@ jobs:
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
           sed -i "s/versionCode .*/versionCode $VERSION_CODE/" android/app/build.gradle
           sed -i "s/versionName .*/versionName \"$VERSION_NAME\"/" android/app/build.gradle
-          echo "▶ version $VERSION_NAME ($VERSION_CODE)"
+          echo "▶ $VERSION_NAME ($VERSION_CODE)"
 
       # ── targetSdk 36 ─────────────────────────────────────────
-      - name: Set API level 36
+      - name: Set API 36
         run: |
-          sed -i "s/compileSdk .*/compileSdk 36/"  android/app/build.gradle
-          sed -i "s/targetSdk .*/targetSdk 36/"    android/app/build.gradle
+          sed -i "s/compileSdk .*/compileSdk 36/" android/app/build.gradle
+          sed -i "s/targetSdk .*/targetSdk 36/"   android/app/build.gradle
           grep -E "compileSdk|targetSdk|versionCode|versionName" android/app/build.gradle
 
       # ── Gradle ────────────────────────────────────────────────
@@ -137,10 +151,6 @@ jobs:
 
       - name: Summary
         run: |
-          echo "## ✅ AI Nile v${{ env.VERSION_NAME }}" >> $GITHUB_STEP_SUMMARY
-          echo "| | |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| versionCode | \`${{ env.VERSION_CODE }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| targetSdk   | \`36\` |" >> $GITHUB_STEP_SUMMARY
           SIZE=$(du -sh android/app/build/outputs/apk/debug/app-debug.apk | cut -f1)
-          echo "| APK Size    | $SIZE |" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ AI Nile v${{ env.VERSION_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "| APK | $SIZE | targetSdk 36 |" >> $GITHUB_STEP_SUMMARY
