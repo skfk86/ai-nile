@@ -1,21 +1,8 @@
 {
   "appId": "com.ali.ainile",
   "appName": "AI Nile",
-  "webDir": ".",
-  "android": {
-    "buildOptions": {
-      "releaseType": "AAB"
-    }
-  },
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
-  },
-  "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 1500,
-      "backgroundColor": "#081a2b",
-      "androidSplashResourceName": "splash",
-      "showSpinner": false
-    }
   }
 }

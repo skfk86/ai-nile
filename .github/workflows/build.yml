@@ -28,6 +28,12 @@ jobs:
       - name: Install Capacitor
         run: npm install
 
+      # ── المجلد الذي يقرأه Capacitor ──────────────────────────
+      - name: Prepare www folder
+        run: |
+          mkdir -p www
+          cp index.html www/index.html
+
       - name: Add Android platform
         run: npx cap add android
 
@@ -55,11 +61,7 @@ jobs:
             convert icon.png -resize ${size}x${size} \
               android/app/src/main/res/$dir/ic_launcher_round.png
           done
-          # أيقونة foreground للـ adaptive icon
-          convert icon.png -resize 108x108 \
-            android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
           echo "✓ Icons generated"
-          ls android/app/src/main/res/mipmap-xxhdpi/
 
       # ─────────────────────────────────────────────────────────
       - name: Cache Gradle
