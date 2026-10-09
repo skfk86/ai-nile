@@ -27,7 +27,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install Capacitor
+      - name: Install packages
         run: npm install
 
       # ── www folder ────────────────────────────────────────────
@@ -42,55 +42,38 @@ jobs:
       - name: Sync web assets
         run: npx cap sync android
 
+      # ── أيقونة التطبيق (الطريقة الرسمية) ─────────────────────
+      - name: Generate app icons
+        run: |
+          mkdir -p assets
+          # نسخ الأيقونة وإنشاء الأحجام المطلوبة
+          cp icon.png assets/icon.png
+          cp icon.png assets/icon-foreground.png
+          # توليد جميع أحجام الأيقونة لـ Android بما فيها Adaptive Icons
+          npx @capacitor/assets generate \
+            --assetPath assets \
+            --androidProject android \
+            --ios false
+          echo "✓ Icons generated"
+          ls android/app/src/main/res/mipmap-xxhdpi/
+
       # ── رقم الإصدار التلقائي ──────────────────────────────────
-      # versionCode  = عدد الـ commits (يرتفع مع كل push)
-      # versionName  = 1.0.<versionCode>
-      - name: Set version code & name
+      - name: Set version
         run: |
           VERSION_CODE=$(git rev-list --count HEAD)
           VERSION_NAME="1.0.${VERSION_CODE}"
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
-          echo "▶ versionCode=$VERSION_CODE  versionName=$VERSION_NAME"
+          sed -i "s/versionCode .*/versionCode $VERSION_CODE/" android/app/build.gradle
+          sed -i "s/versionName .*/versionName \"$VERSION_NAME\"/" android/app/build.gradle
+          echo "▶ version $VERSION_NAME ($VERSION_CODE)"
 
-          # تحديث build.gradle
-          sed -i "s/versionCode .*/versionCode $VERSION_CODE/" \
-            android/app/build.gradle
-          sed -i "s/versionName .*/versionName \"$VERSION_NAME\"/" \
-            android/app/build.gradle
-
-      # ── targetSdk & compileSdk = 36 ──────────────────────────
+      # ── targetSdk 36 ─────────────────────────────────────────
       - name: Set API level 36
         run: |
-          sed -i "s/compileSdk .*/compileSdk 36/"    android/app/build.gradle
-          sed -i "s/targetSdk .*/targetSdk 36/"      android/app/build.gradle
-          sed -i "s/compileSdkVersion .*/compileSdkVersion 36/" android/app/build.gradle
-          sed -i "s/targetSdkVersion .*/targetSdkVersion 36/"   android/app/build.gradle
-          echo "▶ compileSdk/targetSdk set to 36"
+          sed -i "s/compileSdk .*/compileSdk 36/"  android/app/build.gradle
+          sed -i "s/targetSdk .*/targetSdk 36/"    android/app/build.gradle
           grep -E "compileSdk|targetSdk|versionCode|versionName" android/app/build.gradle
-
-      # ── أيقونة التطبيق ────────────────────────────────────────
-      - name: Install ImageMagick
-        run: sudo apt-get install -y imagemagick
-
-      - name: Generate app icons
-        run: |
-          declare -A sizes=(
-            ["mipmap-mdpi"]=48
-            ["mipmap-hdpi"]=72
-            ["mipmap-xhdpi"]=96
-            ["mipmap-xxhdpi"]=144
-            ["mipmap-xxxhdpi"]=192
-          )
-          for dir in "${!sizes[@]}"; do
-            size=${sizes[$dir]}
-            mkdir -p android/app/src/main/res/$dir
-            convert icon.png -resize ${size}x${size} \
-              android/app/src/main/res/$dir/ic_launcher.png
-            convert icon.png -resize ${size}x${size} \
-              android/app/src/main/res/$dir/ic_launcher_round.png
-          done
-          echo "✓ Icons generated"
 
       # ── Gradle ────────────────────────────────────────────────
       - name: Cache Gradle
@@ -115,23 +98,18 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-      # ── Release (يعمل فقط إذا أضفت Secrets) ─────────────────
+      # ── Release ───────────────────────────────────────────────
       - name: Check signing secrets
         id: secrets
         env:
           KB: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          if [ -n "$KB" ]; then
-            echo "available=true" >> $GITHUB_OUTPUT
-          else
-            echo "available=false" >> $GITHUB_OUTPUT
-          fi
+          [ -n "$KB" ] && echo "available=true" >> $GITHUB_OUTPUT \
+                       || echo "available=false" >> $GITHUB_OUTPUT
 
       - name: Build Release AAB
         if: steps.secrets.outputs.available == 'true'
-        run: |
-          cd android
-          ./gradlew bundleRelease --no-daemon
+        run: cd android && ./gradlew bundleRelease --no-daemon
 
       - name: Sign Release AAB
         if: steps.secrets.outputs.available == 'true'
@@ -142,12 +120,9 @@ jobs:
           STORE_PASSWORD:  ${{ secrets.STORE_PASSWORD }}
         run: |
           echo "$KEYSTORE_BASE64" | base64 --decode > release.keystore
-          jarsigner \
-            -sigalg SHA256withRSA \
-            -digestalg SHA-256 \
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 \
             -keystore release.keystore \
-            -storepass "$STORE_PASSWORD" \
-            -keypass "$KEY_PASSWORD" \
+            -storepass "$STORE_PASSWORD" -keypass "$KEY_PASSWORD" \
             android/app/build/outputs/bundle/release/app-release.aab \
             "$KEY_ALIAS"
           rm -f release.keystore
@@ -160,13 +135,12 @@ jobs:
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 90
 
-      # ── ملخص ─────────────────────────────────────────────────
       - name: Summary
         run: |
-          echo "## ✅ AI Nile Build" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ AI Nile v${{ env.VERSION_NAME }}" >> $GITHUB_STEP_SUMMARY
           echo "| | |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| versionName | \`${{ env.VERSION_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| versionCode | \`${{ env.VERSION_CODE }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| targetSdk   | \`36\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit      | \`${GITHUB_SHA::7}\` |" >> $GITHUB_STEP_SUMMARY
+          SIZE=$(du -sh android/app/build/outputs/apk/debug/app-debug.apk | cut -f1)
+          echo "| APK Size    | $SIZE |" >> $GITHUB_STEP_SUMMARY
