@@ -34,6 +34,34 @@ jobs:
       - name: Sync web assets
         run: npx cap sync android
 
+      # ── أيقونة التطبيق ────────────────────────────────────────
+      - name: Install ImageMagick
+        run: sudo apt-get install -y imagemagick
+
+      - name: Generate app icons
+        run: |
+          declare -A sizes=(
+            ["mipmap-mdpi"]=48
+            ["mipmap-hdpi"]=72
+            ["mipmap-xhdpi"]=96
+            ["mipmap-xxhdpi"]=144
+            ["mipmap-xxxhdpi"]=192
+          )
+          for dir in "${!sizes[@]}"; do
+            size=${sizes[$dir]}
+            mkdir -p android/app/src/main/res/$dir
+            convert icon.png -resize ${size}x${size} \
+              android/app/src/main/res/$dir/ic_launcher.png
+            convert icon.png -resize ${size}x${size} \
+              android/app/src/main/res/$dir/ic_launcher_round.png
+          done
+          # أيقونة foreground للـ adaptive icon
+          convert icon.png -resize 108x108 \
+            android/app/src/main/res/mipmap-mdpi/ic_launcher_foreground.png
+          echo "✓ Icons generated"
+          ls android/app/src/main/res/mipmap-xxhdpi/
+
+      # ─────────────────────────────────────────────────────────
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -56,7 +84,7 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-      # ── Release (يعمل فقط إذا أضفت Secrets) ──────────────────
+      # ── Release (يعمل فقط إذا أضفت Secrets) ─────────────────
       - name: Check signing secrets
         id: secrets
         env:
