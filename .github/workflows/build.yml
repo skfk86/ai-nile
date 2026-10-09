@@ -13,6 +13,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,7 +30,7 @@ jobs:
       - name: Install Capacitor
         run: npm install
 
-      # ── المجلد الذي يقرأه Capacitor ──────────────────────────
+      # ── www folder ────────────────────────────────────────────
       - name: Prepare www folder
         run: |
           mkdir -p www
@@ -39,6 +41,33 @@ jobs:
 
       - name: Sync web assets
         run: npx cap sync android
+
+      # ── رقم الإصدار التلقائي ──────────────────────────────────
+      # versionCode  = عدد الـ commits (يرتفع مع كل push)
+      # versionName  = 1.0.<versionCode>
+      - name: Set version code & name
+        run: |
+          VERSION_CODE=$(git rev-list --count HEAD)
+          VERSION_NAME="1.0.${VERSION_CODE}"
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "▶ versionCode=$VERSION_CODE  versionName=$VERSION_NAME"
+
+          # تحديث build.gradle
+          sed -i "s/versionCode .*/versionCode $VERSION_CODE/" \
+            android/app/build.gradle
+          sed -i "s/versionName .*/versionName \"$VERSION_NAME\"/" \
+            android/app/build.gradle
+
+      # ── targetSdk & compileSdk = 36 ──────────────────────────
+      - name: Set API level 36
+        run: |
+          sed -i "s/compileSdk .*/compileSdk 36/"    android/app/build.gradle
+          sed -i "s/targetSdk .*/targetSdk 36/"      android/app/build.gradle
+          sed -i "s/compileSdkVersion .*/compileSdkVersion 36/" android/app/build.gradle
+          sed -i "s/targetSdkVersion .*/targetSdkVersion 36/"   android/app/build.gradle
+          echo "▶ compileSdk/targetSdk set to 36"
+          grep -E "compileSdk|targetSdk|versionCode|versionName" android/app/build.gradle
 
       # ── أيقونة التطبيق ────────────────────────────────────────
       - name: Install ImageMagick
@@ -63,7 +92,7 @@ jobs:
           done
           echo "✓ Icons generated"
 
-      # ─────────────────────────────────────────────────────────
+      # ── Gradle ────────────────────────────────────────────────
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -82,7 +111,7 @@ jobs:
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: AI-Nile-debug-v${{ github.run_number }}
+          name: AI-Nile-v${{ env.VERSION_NAME }}-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
@@ -127,6 +156,17 @@ jobs:
         if: steps.secrets.outputs.available == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: AI-Nile-release-v${{ github.run_number }}
+          name: AI-Nile-v${{ env.VERSION_NAME }}-release
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 90
+
+      # ── ملخص ─────────────────────────────────────────────────
+      - name: Summary
+        run: |
+          echo "## ✅ AI Nile Build" >> $GITHUB_STEP_SUMMARY
+          echo "| | |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| versionName | \`${{ env.VERSION_NAME }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| versionCode | \`${{ env.VERSION_CODE }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| targetSdk   | \`36\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit      | \`${GITHUB_SHA::7}\` |" >> $GITHUB_STEP_SUMMARY
