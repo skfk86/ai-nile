@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Nile</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#081a2b;--s1:#0f2a42;--s2:#16374f;--tx:#eef4f3;--mu:#8fa9b5;--ac:#27b5a3;--go:#e6b450;--ln:#ffffff14;--hero:#0e4a5c;color-scheme:dark}
+@media(prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#f4efe3;--s1:#fffdf7;--s2:#ece4d0;--tx:#10283a;--mu:#5d7380;--ac:#0f8f80;--go:#b8861f;--ln:#10283a1a;--hero:#0e4a5c;color-scheme:light}}
+:root[data-theme=light]{--bg:#f4efe3;--s1:#fffdf7;--s2:#ece4d0;--tx:#10283a;--mu:#5d7380;--ac:#0f8f80;--go:#b8861f;--ln:#10283a1a;--hero:#0e4a5c;color-scheme:light}
+:root[data-theme=dark]{--bg:#081a2b;--s1:#0f2a42;--s2:#16374f;--tx:#eef4f3;--mu:#8fa9b5;--ac:#27b5a3;--go:#e6b450;--ln:#ffffff14;--hero:#0e4a5c;color-scheme:dark}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--tx);font:400 15px/1.7 "IBM Plex Sans Arabic",Tahoma,system-ui,sans-serif;overflow:hidden}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible{outline:2px solid var(--go);outline-offset:2px}
+#app{height:100%;display:flex;flex-direction:column;max-width:560px;margin:auto;position:relative}
+header{display:flex;align-items:center;gap:10px;padding:10px 16px;flex:none}
+header h1{font-size:18px;font-weight:700;flex:1}header h1 b{color:var(--go)}
+.ib{width:40px;height:40px;border-radius:13px;background:var(--s1);border:1px solid var(--ln);display:grid;place-items:center;flex:none}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 16px 20px}
+nav{display:flex;background:var(--s1);border-top:1px solid var(--ln);padding:5px 4px 7px;flex:none}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;font-size:11px;color:var(--mu);border-radius:12px}
+nav button.on{color:var(--ac);font-weight:600}
+nav button.on svg{stroke-width:2.2}
+.ic(x){width:22px;height:22px}
+.hero{position:relative;overflow:hidden;border-radius:24px;background:var(--hero);color:#eaf7f4;padding:18px;min-height:168px;margin-bottom:16px}
+.hero .wv{position:absolute;inset:auto 0 0 0;width:100%;height:100%;pointer-events:none}
+.hero>*:not(.wv){position:relative}
+.hero h2{font-size:20px;line-height:1.35;margin:4px 0 10px;font-weight:700}
+.hero small{opacity:.85;font-size:13px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--go);color:#1d1503;font-weight:700;border-radius:13px;padding:10px 16px;font-size:14px}
+.btn.ac{background:var(--ac);color:#fff}
+.btn.ghost{background:var(--s2);color:var(--tx)}
+.btn.full{width:100%;justify-content:center}
+h3{font-size:15px;margin:18px 0 9px;font-weight:700}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:18px;padding:13px;display:flex;gap:11px;align-items:center;width:100%;text-align:right;margin-bottom:8px}
+.ico{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--s2);color:var(--ac);flex:none}
+.ico.go{color:var(--go)}
+.card .t{flex:1;min-width:0}
+.card .t b{display:block;font-weight:600;font-size:14.5px}
+.card .t span{color:var(--mu);font-size:12.5px}
+.done .ico{background:var(--ac);color:#fff}
+.bar{height:7px;border-radius:9px;background:var(--s2);overflow:hidden;margin-top:7px}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:9px;transition:width .5s}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat{background:var(--s1);border:1px solid var(--ln);border-radius:18px;padding:13px}
+.stat b{font-size:24px;display:block;line-height:1.2;font-weight:700}
+.stat span{color:var(--mu);font-size:12.5px}
+.stat svg{color:var(--go);margin-bottom:5px}
+.badge{background:var(--s1);border:1px solid var(--ln);border-radius:18px;padding:14px 9px;text-align:center}
+.badge .ico{margin:0 auto 7px;width:50px;height:50px;border-radius:50%}
+.badge.off{opacity:.5}
+.badge.on .ico{background:var(--go);color:#1d1503}
+.badge b{font-size:13px;display:block;line-height:1.4}
+.badge span{font-size:12px;color:var(--mu)}
+.row{display:flex;align-items:center;gap:11px;background:var(--s1);border:1px solid var(--ln);border-radius:17px;padding:11px 13px;margin-bottom:9px}
+.row .t{flex:1}.row .t span{display:block;color:var(--mu);font-size:12px}
+.sw{width:48px;height:28px;border-radius:20px;background:var(--s2);position:relative;transition:.2s;flex:none;border:1px solid var(--ln)}
+.sw::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--ac);border-color:var(--ac)}.sw.on::after{inset-inline-start:23px}
+.seg{display:flex;background:var(--s2);border-radius:11px;padding:3px;gap:2px}
+.seg button{padding:4px 10px;border-radius:9px;font-size:12.5px;color:var(--mu)}
+.seg button.on{background:var(--ac);color:#fff}
+.scrim{position:absolute;inset:0;background:#000a;opacity:0;pointer-events:none;transition:.25s;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:absolute;top:0;bottom:0;inset-inline-start:0;width:84%;max-width:320px;background:var(--bg);border-inline-end:1px solid var(--ln);z-index:30;transform:translateX(105%);transition:transform .3s;padding:calc(16px + env(safe-area-inset-top,0px)) 16px 16px;overflow-y:auto}
+.drawer.on{transform:none}
+.toast{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));inset-inline:16px;background:var(--go);color:#1d1503;font-weight:700;border-radius:15px;padding:11px 15px;z-index:60;display:flex;gap:9px;align-items:center;transform:translateY(-160%);transition:transform .35s}
+.toast.on{transform:none}
+.muted{color:var(--mu);font-size:13px}
+.logo{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+.logo .ico{width:52px;height:52px;background:var(--hero);color:var(--go)}
+/* Lesson page */
+#lp{position:absolute;inset:0;background:var(--bg);z-index:15;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
+#lp.on{transform:none}
+#lp header{border-bottom:1px solid var(--ln)}
+.lprog{height:3px;background:var(--s2);margin-bottom:0}
+.lprog i{display:block;height:100%;background:var(--go);transition:width .4s}
+#lbody{flex:1;overflow-y:auto;padding:0 16px 120px}
+.ls-h{font-size:18px;font-weight:700;margin:22px 0 8px;color:var(--tx)}
+.ls-p{margin:0 0 12px;line-height:1.8;color:var(--tx)}
+.ls-tip{background:var(--s1);border-right:3px solid var(--go);border-radius:0 14px 14px 0;padding:11px 13px;margin:12px 0;display:flex;gap:9px;font-size:13.5px}
+.ls-tip svg{color:var(--go);flex:none;margin-top:2px}
+.ls-list{margin:6px 0 14px;padding-right:4px;list-style:none}
+.ls-list li{padding:5px 0 5px 0;border-bottom:1px solid var(--ln);font-size:14px;display:flex;gap:8px}
+.ls-list li::before{content:"▸";color:var(--ac);font-size:12px;margin-top:3px;flex:none}
+.ls-code{background:var(--s2);border-radius:13px;padding:13px;margin:10px 0 14px;font-family:monospace;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-all;border:1px solid var(--ln)}
+/* Quiz */
+.quiz{background:var(--s1);border:1px solid var(--ln);border-radius:22px;padding:16px;margin-top:24px}
+.quiz h4{font-size:15px;font-weight:700;margin-bottom:13px;color:var(--go)}
+.qopt{width:100%;text-align:right;background:var(--s2);border:1.5px solid transparent;border-radius:14px;padding:11px 13px;margin-bottom:8px;font-size:13.5px;transition:.15s;display:flex;gap:9px;align-items:flex-start}
+.qopt .qn{width:24px;height:24px;border-radius:50%;background:var(--s1);display:grid;place-items:center;font-size:12px;font-weight:700;flex:none;color:var(--mu)}
+.qopt.sel{border-color:var(--ac);background:#27b5a322}
+.qopt.sel .qn{background:var(--ac);color:#fff}
+.qopt.ok{border-color:var(--ac);background:#27b5a322}
+.qopt.ok .qn{background:var(--ac);color:#fff}
+.qopt.err{border-color:#e05555;background:#e0555522}
+.qopt.err .qn{background:#e05555;color:#fff}
+.qfb{border-radius:13px;padding:11px 13px;margin-top:10px;font-size:13.5px;display:none}
+.qfb.ok{background:#27b5a333;color:var(--ac);display:block}
+.qfb.err{background:#e0555533;color:#ff8a8a;display:block}
+#lcomplete{position:absolute;bottom:0;inset-inline:0;background:var(--bg);border-top:1px solid var(--ln);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+.wv path{animation:fl 7s linear infinite}
+@keyframes fl{to{transform:translateX(-80px)}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+<symbol id="route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+<symbol id="trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+<symbol id="set" viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></symbol>
+<symbol id="menu" viewBox="0 0 24 24"><path d="M4 12h16M4 6h16M4 18h16"/></symbol>
+<symbol id="flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="spark" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+<symbol id="zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></symbol>
+<symbol id="code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></symbol>
+<symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+<symbol id="moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+<symbol id="target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+<symbol id="trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+<symbol id="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+<symbol id="phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+<symbol id="rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+<symbol id="trend" viewBox="0 0 24 24"><path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></symbol>
+<symbol id="brain" viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.07-4.89A2.5 2.5 0 1 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.07-4.89A2.5 2.5 0 1 0 14.5 2Z"/></symbol>
+<symbol id="tool" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+</defs></svg>
+
+<div id="app">
+  <header id="hdr">
+    <button class="ib" id="mb"><svg class="i"><use href="#menu"/></svg></button>
+    <h1>AI <b>Nile</b></h1>
+    <div class="ib" style="color:var(--go);width:auto;padding:0 11px;display:flex;gap:4px;font-weight:700;font-size:14px"><svg class="i" style="width:18px;height:18px"><use href="#flame"/></svg><span id="sk">0</span></div>
+  </header>
+  <main id="main"></main>
+  <nav id="nav"></nav>
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer"></aside>
+  <div class="toast" id="toast"></div>
+  <!-- Lesson Full Page -->
+  <div id="lp">
+    <header id="lphdr">
+      <button class="ib" onclick="closeLP()"><svg class="i"><use href="#back"/></svg></button>
+      <span id="lptitle" style="flex:1;font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <span id="lpnum" class="muted" style="font-size:13px;white-space:nowrap"></span>
+    </header>
+    <div class="lprog"><i id="lprogi"></i></div>
+    <div id="lbody"></div>
+    <div id="lcomplete"></div>
+  </div>
+</div>
+
+<script>
+const ic=id=>`<svg class="i"><use href="#${id}"/></svg>`;
+const PATHS=[
+{t:"أساسيات الذكاء الاصطناعي",d:"افهم كيف تعمل الأدوات قبل أن تستخدمها",ic:"brain"},
+{t:"هندسة الأوامر",d:"اكتب أوامر تحصل على نتائج دقيقة",ic:"target"},
+{t:"Vibe Coding",d:"حوّل الوصف إلى تطبيق يعمل",ic:"code"},
+{t:"الوكلاء والـ API",d:"أتمتة المهام وربط الخدمات",ic:"rocket"},
+{t:"النشر والتسويق",d:"من الكود إلى المتجر والمستخدمين",ic:"trend"},
+{t:"أدوات الإنتاجية",d:"اضرب المئة في مئة في إنتاجيتك",ic:"tool"}];
+
+const L=[
+// Path 0
+{p:0,t:"ما هو الذكاء الاصطناعي فعلاً؟",m:5,ic:"spark",
+body:[
+{h:"البرنامج الذي يجد الأنماط"},
+{p:"الذكاء الاصطناعي ليس ذكاءً إنسانياً، بل برامج ذكية تتدرب على مليارات الأمثلة وتتعلم منها كيف تتنبأ وتولّد وتصنّف. أعطها سياقاً جيداً، وستعطيك نتيجة رائعة."},
+{t:"فكّر فيه كمساعد فائق السرعة يحتاج توجيهاً واضحاً — جودة مدخلاتك تحدد جودة مخرجاته."},
+{h:"أنواع الذكاء الاصطناعي المستخدمة اليوم"},
+{l:["النماذج اللغوية LLM: تكتب وتحلّل وتلخّص وتبرمج","نماذج الصور: تفهم وتولّد الصور والفيديو","نماذج الصوت: نصّ إلى كلام والعكس","النماذج متعددة الوسائط: تجمع كل ما سبق معاً"]}],
+quiz:{q:"ما الذي يُميّز الذكاء الاصطناعي عن البرامج التقليدية؟",opts:["يعمل بدون كهرباء","يتعلم من البيانات ويُحسّن أداءه","يفهم المشاعر البشرية بالكامل","يتطلب تعليمات دقيقة لكل حالة"],ans:1,ex:"الفرق الجوهري: البرامج التقليدية تنفّذ قواعد ثابتة، أما الذكاء الاصطناعي فيتعلم الأنماط من البيانات ويعمم ما تعلّمه على حالات جديدة."}},
+
+{p:0,t:"كيف تعمل النماذج اللغوية",m:7,ic:"brain",
+body:[
+{h:"التوقع كلمة بكلمة"},
+{p:"النموذج اللغوي يتوقع الكلمة التالية الأنسب بناءً على كل ما سبقها. تتكرر هذه العملية لتتكوّن جملة كاملة. بسبب هذا، كلما كان سياق سؤالك أغنى وأوضح كانت الإجابة أدق."},
+{t:"الـ Token هو وحدة النص التي يعالجها النموذج — قد تكون كلمة أو جزءاً منها. ترسل أنت سياقاً (Prompt) ويرسل هو رداً ضمن حدود أقصى تسمى context window."},
+{h:"مفاهيم جوهرية"},
+{l:["Temperature: كلما زادت، كانت الإجابات أكثر إبداعاً وتنوعاً","Context Window: حجم الذاكرة المؤقتة للمحادثة","Tokens: وحدة المعالجة — جملة واحدة ≈ 15 توكن","Hallucination: النموذج يولّد إجابة تبدو صحيحة لكنها خاطئة"]}],
+quiz:{q:"لماذا تُعطي نفس السؤال أحياناً إجابات مختلفة؟",opts:["النموذج ينسى الإجابة السابقة","العشوائية المضبوطة (Temperature) تُنوّع الإجابات","الخادم في مكان مختلف كل مرة","لا يوجد سبب واضح"],ans:1,ex:"معامل Temperature يضيف عشوائية مضبوطة تُنوّع الإجابات. اجعله 0 للحصول على إجابات ثابتة قابلة للتكرار."}},
+
+{p:0,t:"أشهر الأدوات: كيف تختار المناسب",m:6,ic:"tool",
+body:[
+{h:"خريطة الأدوات"},
+{l:["ChatGPT / Claude / Gemini: محادثة ومساعدة عامة وبرمجة","Cursor / Windsurf / GitHub Copilot: بيئة تطوير بالذكاء الاصطناعي","Midjourney / DALL-E / Ideogram: توليد الصور","ElevenLabs / Suno: الصوت والموسيقى","n8n / Zapier: أتمتة سير العمل"]},
+{t:"لا تحتاج كل الأدوات. ابدأ بأداة واحدة وأتقنها قبل أن تنتقل للتالية."},
+{h:"كيف تختار؟"},
+{p:"اسأل: ما المهمة التي تريد إنجازها؟ إن كانت برمجة، Cursor أفضل. إن كانت تحليل وتلخيص، Claude أفضل. إن كانت صوراً، Midjourney لا منافس له. أهم معيار: الأداة التي يستخدمها مجتمعك أو فريقك."}],
+quiz:{q:"ما أفضل أداة للمساعدة في كتابة كود Android بشكل تفاعلي؟",opts:["Suno","Cursor أو Windsurf","DALL-E","n8n"],ans:1,ex:"Cursor وWindsurf بيئات تطوير مدمجة مع الذكاء الاصطناعي. تقرأ ملفاتك، تفهم مشروعك، وتكتب وتعدّل الكود مباشرة."}},
+
+{p:0,t:"حدود الذكاء الاصطناعي: متى لا تثق به",m:6,ic:"info",
+body:[
+{h:"الـ Hallucination: الخطر الأول"},
+{p:"النموذج يولّد إجابات تبدو واثقة حتى حين تكون خاطئة. لا يوجد لديه مؤشر داخلي للتحقق من الواقع. دائماً تحقق من الأرقام والمراجع والمعلومات الحساسة."},
+{t:"القاعدة: كلما كانت المهمة قابلة للتحقق، تحقق منها. لا تُسلّم الذكاء الاصطناعي مهاماً حساسة دون مراجعة بشرية."},
+{h:"متى تحذر؟"},
+{l:["معلومات طبية أو قانونية أو مالية: راجع متخصصاً","الكود: اختبره دائماً قبل النشر","الأرقام والإحصاءات: تحقق من المصدر الأصلي","أحداث بعد تاريخ التدريب: النموذج لا يعلم"]}],
+quiz:{q:"ما الصواب الذي يجب فعله دائماً عند تلقي معلومات من الذكاء الاصطناعي؟",opts:["نشرها فوراً","الثقة التامة بها لأنها محوسبة","التحقق منها خاصة في المواضيع الحساسة","رفضها دائماً"],ans:2,ex:"التحقق لا يعني عدم الثقة، بل استخدام الذكاء الاصطناعي كنقطة بداية وتدقيق المخرجات الحساسة."}},
+
+// Path 1
+{p:1,t:"تشريح الأمر المثالي",m:8,ic:"target",
+body:[
+{h:"مكوّنات الأمر الفعّال"},
+{l:["الدور: أنت خبير متخصص في...","المهمة: أريدك أن تقوم بـ...","السياق: هذا للجمهور... والغرض...","القيود: لا تتجاوز... تجنب...","الشكل: اكتب بـ X نقاط / JSON / قائمة"]},
+{p:"مثال ضعيف: «اكتب تطبيق اندرويد». مثال قوي: «أنت مطور أندرويد Kotlin خبير. اكتب ViewModel لإدارة قائمة مهام مع Flow و Room، بدون ViewModel Factory، وأضف تعليقات للأجزاء المعقدة.»"},
+{t:"القاعدة: كلما ضيّقت السياق، قلّت المفاجآت. الأمر الضعيف يجبر النموذج على التخمين."}],
+quiz:{q:"ما أهم عنصر في الأمر يُقلّل من الإجابات غير المناسبة؟",opts:["طول الأمر","وضوح الدور والقيود","استخدام الإنجليزية","عدد علامات الاستفهام"],ans:1,ex:"تحديد الدور يُحرّك النموذج نحو سياق معين، والقيود تمنع الخروج عنه. هذان العنصران يُحسّنان الإجابات أكثر من أي شيء آخر."}},
+
+{p:1,t:"تقنيات متقدمة: Chain of Thought وFew-Shot",m:9,ic:"brain",
+body:[
+{h:"Chain of Thought — اجعله يفكر بصوت عالٍ"},
+{p:"أضف في نهاية أمرك: «فكّر خطوة بخطوة» أو «اشرح تفكيرك قبل الإجابة». هذا يُجبر النموذج على الاستدلال التسلسلي بدل القفز للإجابة، مما يُحسّن الدقة في المسائل المعقدة."},
+{h:"Few-Shot — علّمه بالأمثلة"},
+{p:"قدّم 2-3 أمثلة بصيغة «مدخل → مخرج» قبل طلبك الحقيقي. النموذج سيقلّد نمطك بدقة عالية. هذا أقوى من أي وصف لفظي للتنسيق المطلوب."},
+{t:"دمج الاثنتين: أمثلة + تفكير خطوة بخطوة = أعلى دقة ممكنة لمعظم المهام."}],
+quiz:{q:"ما الأسلوب الأفضل لتحسين دقة النموذج في المسائل المنطقية؟",opts:["رفع عدد الكلمات في الأمر","طلب Chain of Thought (التفكير خطوة بخطوة)","كتابة الأمر بالإنجليزية فقط","إرسال نفس السؤال مرات عدة"],ans:1,ex:"Chain of Thought يُجبر النموذج على بناء استدلاله تدريجياً بدل القفز للنتيجة مباشرة، مما يُقلل الأخطاء في المسائل المعقدة بشكل ملحوظ."}},
+
+{p:1,t:"كيف تطوّر أوامرك وتحسّنها",m:7,ic:"trend",
+body:[
+{h:"دورة التحسين المستمر"},
+{l:["أرسل الأمر واحصل على الإجابة","حدّد الجزء الضعيف بدقة","عدّل عنصراً واحداً فقط في كل مرة","قارن النتيجة قبل وبعد","احفظ الأوامر الناجحة في ملف خاص"]},
+{t:"لا تُعدّل كل شيء دفعة واحدة — لن تعرف ما الذي أصلح الخلل. التحسين التدريجي هو المنهج العلمي."},
+{h:"أخطاء شائعة في الأوامر"},
+{p:"الطلب الغامض («اجعله أفضل»)، التضارب في التعليمات («مختصر ومفصّل»)، الافتراض أن النموذج يعرف سياقك. الحل دائماً: الوضوح والتحديد."}],
+quiz:{q:"لماذا يجب تغيير عنصر واحد فقط في كل تجربة لتحسين الأمر؟",opts:["لتوفير الوقت","لمعرفة أي تغيير بالضبط أثّر في النتيجة","لأن النموذج لا يتحمّل تغييرات كثيرة","لا سبب حقيقي"],ans:1,ex:"هذا مبدأ التجريب العلمي: متغير واحد في كل اختبار لتحديد السبب والنتيجة بدقة."}},
+
+// Path 2
+{p:2,t:"ما هو Vibe Coding وكيف تبدأ",m:6,ic:"code",
+body:[
+{h:"ترميز بالأوصاف"},
+{p:"Vibe Coding أن تصف ما تريد بلغة طبيعية ويكتب الذكاء الاصطناعي الكود. دورك يتحول من كاتب أسطر إلى مصمم قرارات: توجّه، تراجع، تختبر، وتوجّه من جديد."},
+{t:"ليس معناه أنك لا تحتاج فهماً للبرمجة — بل أنك تُنجز أكثر بجهد أقل. الفهم يجعلك تُوجّه أفضل وتكتشف الأخطاء أسرع."},
+{h:"أدوات Vibe Coding"},
+{l:["Cursor: بيئة كاملة مع دردشة وتحرير مباشر","Bolt.new / v0: من وصف إلى واجهة في ثوانٍ","Claude + Termux: قوة في جيبك على Android","GitHub Copilot: اقتراحات ذكية داخل VS Code"]}],
+quiz:{q:"ما الدور الجديد للمطوّر في Vibe Coding؟",opts:["لا يوجد دور له","كاتب كود يدوي بالكامل","مصمم قرارات وموجّه ومراجع جودة","مدير مشاريع فقط"],ans:2,ex:"الذكاء الاصطناعي يكتب الكود، لكن المطوّر يُحدد المتطلبات ويوجّه ويختبر ويُقرّر. الدور يرتفع من تنفيذي إلى استراتيجي."}},
+
+{p:2,t:"ابنِ أول تطبيق: من وصف إلى APK",m:12,ic:"phone",
+body:[
+{h:"المنهجية الصحيحة"},
+{l:["جملتان فأقل: صف التطبيق، من يستخدمه، وهدفه","ابدأ بأبسط شاشة واحدة تعمل","أضف ميزة واحدة في كل طلب","اختبر بعد كل إضافة قبل المتابعة"]},
+{h:"مثال عملي"},
+{p:"بدلاً من: «اصنع تطبيق لياقة بدنية كامل». قل: «تطبيق أندرويد بـ Jetpack Compose، شاشة واحدة، تُدخل فيها وزنك اليوم وتحفظه بـ Room. بدون شاشة إعدادات الآن.»"},
+{t:"طلب واحد = تغيير واحد. هذه القاعدة توفّر 80% من وقت تصحيح الأخطاء."}],
+quiz:{q:"لماذا تبدأ بشاشة واحدة بسيطة بدل التطبيق الكامل؟",opts:["لأن الذكاء الاصطناعي لا يتحمّل أكثر","لتتحقق أن الأساس يعمل قبل البناء عليه","لتوفير رسوم الـ API","لا فرق في النتيجة"],ans:1,ex:"البناء التدريجي يُقلّل تراكم الأخطاء. أخطاء شاشة واحدة سهلة الإصلاح. أخطاء 10 شاشات متشابكة = كابوس."}},
+
+{p:2,t:"تصحيح الأخطاء مع الذكاء الاصطناعي",m:8,ic:"tool",
+body:[
+{h:"صيغة البلاغ المثالية"},
+{p:"عند ظهور خطأ، لا تقل «لا يعمل». قُل: «رسالة الخطأ كاملة هي: [الخطأ]. الكود الذي أحدثه: [الكود]. كنت أتوقع: [التوقع]. ما سبب الخطأ وكيف أحله؟»"},
+{t:"اطلب منه دائماً: «اشرح السبب الجذري قبل كتابة الحل». الفهم يمنع تكرار نفس الخطأ."},
+{h:"أنواع الأخطاء الشائعة"},
+{l:["Compile Error: خطأ في الصياغة — عادة سهل الحل","Runtime Crash: يحتاج logcat والـ stack trace كاملاً","Logic Bug: التطبيق يعمل لكن النتائج خاطئة — الأصعب","Build Error: مشكلة في Gradle أو dependencies"]}],
+quiz:{q:"ما أهم شيء ترسله للذكاء الاصطناعي عند طلب مساعدة في إصلاح bug؟",opts:["اسم الملف فقط","رسالة الخطأ كاملة مع الكود المُحدث","لقطة شاشة فقط","وصف عام للمشكلة"],ans:1,ex:"رسالة الخطأ الكاملة + الكود = 90% من المعلومات التي يحتاجها النموذج. الوصف العام يؤدي لإجابات تخمينية."}},
+
+// Path 3
+{p:3,t:"الوكلاء الأذكياء: فهم وبناء",m:9,ic:"rocket",
+body:[
+{h:"ما هو الوكيل (Agent)؟"},
+{p:"الوكيل نموذج ذكاء اصطناعي مُزوَّد بأدوات: يبحث، يقرأ الملفات، ينفّذ الكود، يُرسل رسائل. يُخطّط لخطوات متعددة لتحقيق هدف. الفرق عن ChatGPT: الوكيل يتصرّف، لا يكتفي بالكلام."},
+{t:"ابدأ بمهام بسيطة قابلة للتحقق وحدّد صلاحيات واضحة. دائماً راجع ما فعله الوكيل قبل الاعتماد على نتائجه."},
+{h:"أمثلة على وكلاء مفيدة"},
+{l:["وكيل يبحث في الويب ويلخّص النتائج","وكيل يقرأ ملف CSV ويُنشئ تقريراً","وكيل يراجع الكود ويقترح تحسينات","وكيل يُنظّم الملفات وفق قواعد محددة"]}],
+quiz:{q:"ما الفرق الجوهري بين نموذج لغوي عادي والوكيل (Agent)؟",opts:["الوكيل أذكى من النموذج العادي","الوكيل يستطيع استخدام أدوات والتصرف في العالم الحقيقي","الوكيل يتكلم العربية بشكل أفضل","الوكيل لا يحتاج لأوامر"],ans:1,ex:"النموذج العادي ينتج نصاً فقط. الوكيل لديه أدوات — بحث، ملفات، APIs — يستخدمها لإنجاز مهام متعددة الخطوات."}},
+
+{p:3,t:"ربط Anthropic API بتطبيقك",m:12,ic:"code",
+body:[
+{h:"المبدأ الأساسي"},
+{p:"ترسل طلب HTTP يحتوي رسالة النظام ورسالة المستخدم، وتستقبل رداً نصياً من النموذج. كل ما تحتاجه: مفتاح API، والمعرف model، ومحتوى الرسالة."},
+{h:"مثال الاستدعاء"},
+{c:`val response = client.post("https://api.anthropic.com/v1/messages") {
+  header("x-api-key", BuildConfig.ANTHROPIC_KEY)
+  header("anthropic-version", "2023-06-01")
+  setBody(mapOf(
+    "model" to "claude-haiku-4-5",
+    "max_tokens" to 1024,
+    "messages" to listOf(
+      mapOf("role" to "user", "content" to userMessage)
+    )
+  ))
+}`},
+{t:"لا تضع مفتاح API داخل الكود مباشرة — استخدم BuildConfig أو متغيرات البيئة في GitHub Actions."}],
+quiz:{q:"أين يجب تخزين مفتاح Anthropic API في مشروع Android؟",opts:["في MainActivity مباشرة","في BuildConfig عبر gradle.properties المستثنى من git","في string.xml","في أي مكان مناسب"],ans:1,ex:"gradle.properties + .gitignore هو المعيار الصحيح. تسريب المفاتيح في GitHub مشكلة شائعة ومكلفة جداً."}},
+
+{p:3,t:"أتمتة المهام مع n8n",m:8,ic:"tool",
+body:[
+{h:"ما هي n8n؟"},
+{p:"n8n منصة أتمتة مرئية: تربط خدمات ببعضها بدون كود. مثل: «عندما يُرسل مستخدم بريداً → استخرج المهمة بالذكاء الاصطناعي → أضفها في Notion → أرسل إشعاراً في Slack»."},
+{t:"يمكنك تشغيل n8n مجاناً على خادمك الخاص أو على Railway. الخيار المستضاف أسهل للبداية."},
+{h:"أمثلة على التدفقات المفيدة"},
+{l:["تلقائي: نشر محتوى على جميع المنصات بضغطة","ذكي: تحليل تقييمات التطبيق يومياً وإرسال ملخص","تكامل: ربط GitHub Issues بـ Trello و Slack","مراقبة: إشعار فوري عند تجاوز حد استخدام API"]}],
+quiz:{q:"ما ميزة n8n على كتابة كود التكامل يدوياً؟",opts:["أسرع من الكود بآلاف المرات","واجهة مرئية تُسرّع البناء وتُقلّل الأخطاء","تعمل بدون إنترنت","لا تحتاج أي تكوين"],ans:1,ex:"n8n تُقلّل من 100 سطر كود إلى تدفق مرئي. التركيز ينتقل من «كيف أربط» إلى «ماذا أبني»."}},
+
+// Path 4
+{p:4,t:"من الكود إلى Google Play",m:10,ic:"phone",
+body:[
+{h:"قائمة ما تحتاجه"},
+{l:["حساب Google Play (25$ مرة واحدة)","ملف AAB موقّع بـ keystore خاص بك","أيقونة 512x512 وlqطات شاشة لكل مقاس","سياسة خصوصية (صفحة ويب بسيطة تكفي)","وصف جذاب بالعربية والإنجليزية"]},
+{t:"جهّز كل هذا قبل أسبوع من إطلاقك. مراجعة Google تأخذ 1-7 أيام للتطبيقات الجديدة."},
+{h:"خطوة Signing في GitHub Actions"},
+{p:"احفظ keystore كـ Base64 في GitHub Secrets. في workflow، فكّ الترميز وقم بالتوقيع أثناء البناء. هكذا تحصل على AAB موقّعاً جاهزاً للرفع بدون أن تكشف مفاتيحك."}],
+quiz:{q:"ما الملف الذي يجب رفعه إلى Google Play بدلاً من APK؟",opts:["APK عادي","AAB (Android App Bundle)","ZIP للكود","JAR"],ans:1,ex:"AAB يُخلّي Google تُولّد APK مُحسَّناً لكل جهاز. حجمه أصغر وأداؤه أفضل."}},
+
+{p:4,t:"التسويق بالذكاء الاصطناعي",m:8,ic:"trend",
+body:[
+{h:"المحتوى الذي يُحوّل"},
+{p:"اطلب من الذكاء الاصطناعي توليد: عنوان التطبيق، وصف المتجر المحسّن لـ ASO، منشورات إطلاق لكل منصة، ردود احترافية على تقييمات المستخدمين، وأفكار لتحديثات تعالج أكثر الشكاوى تكراراً."},
+{t:"أعطه تقييمات تطبيقك المنافسة وقل: «ما الميزات التي يطلبها المستخدمون كثيراً ولا تتوفر في هذه التطبيقات؟» — طريقة ذكية لاكتشاف فرص السوق."},
+{h:"ASO بمساعدة الذكاء الاصطناعي"},
+{l:["توليد كلمات مفتاحية عالية التحويل بالعربية","تحسين وصف المتجر لرفع ترتيب البحث","اختبار A/B لعناوين مختلفة","تحليل منافسيك والتموضع الصحيح"]}],
+quiz:{q:"كيف تستخدم الذكاء الاصطناعي لاكتشاف ميزات يريدها السوق؟",opts:["تخمين الميزات","تغذيته بتقييمات المنافسين وطلب التحليل","سؤال الأصدقاء","قراءة مدونات التطوير"],ans:1,ex:"تقييمات المستخدمين على تطبيقات المنافسين هي منجم من الرؤى المجانية. الذكاء الاصطناعي يُحلّلها ويُلخّص أبرز الفرص في دقائق."}},
+
+// Path 5
+{p:5,t:"Claude في Termux: قوة في جيبك",m:7,ic:"phone",
+body:[
+{h:"لماذا Termux؟"},
+{p:"مع Termux وسكريبت بسيط، تحصل على مساعد ذكاء اصطناعي في سطر الأوامر على هاتفك مباشرة. مناسب لبناء أدوات خاصة، أتمتة المهام، ومعالجة الملفات بدون الحاجة لجهاز كمبيوتر."},
+{h:"سكريبت بسيط للبداية"},
+{c:`#!/data/data/com.termux/files/usr/bin/fish
+# احفظ مفتاحك: set -Ux ANTHROPIC_KEY "sk-..."
+function ask
+  curl -s https://api.anthropic.com/v1/messages \\
+    -H "x-api-key: $ANTHROPIC_KEY" \\
+    -H "anthropic-version: 2023-06-01" \\
+    -H "content-type: application/json" \\
+    -d "{\"model\":\"claude-haiku-4-5\",\"max_tokens\":512,\"messages\":[{\"role\":\"user\",\"content\":\"$argv\"}]}" \\
+    | python3 -c "import sys,json; print(json.load(sys.stdin)['content'][0]['text'])"
+end`},
+{t:"fish shell + هذه الدالة = ask \"ما خطأ هذا الكود؟\" مباشرة من Termux."}],
+quiz:{q:"ما ميزة استخدام Claude API من Termux مباشرة؟",opts:["لا توجد ميزة","أتمتة مهام محلية وبناء أدوات خاصة بدون جهاز كمبيوتر","أسرع من الواجهة الرسمية","مجاني تماماً"],ans:1,ex:"من Termux تستطيع تحليل ملفات، أتمتة مهام متكررة، وبناء أدوات مخصصة كل ذلك من هاتفك."}},
+
+{p:5,t:"GitHub Actions: بناء بدون بيانات",m:10,ic:"code",
+body:[
+{h:"لماذا GitHub Actions؟"},
+{p:"بدلاً من تنزيل مئات MB من Android SDK على هاتفك، تدفع مؤشر لـ GitHub ويُشغّل البناء على خوادمهم المجانية. النتيجة: APK أو AAB جاهز لتنزيله في كل push."},
+{h:"workflow أساسي"},
+{c:`name: Build Android
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with: {java-version: '17', distribution: 'temurin'}
+    - run: chmod +x gradlew
+    - run: ./gradlew assembleRelease
+    - uses: actions/upload-artifact@v4
+      with: {name: apk, path: '**/*.apk'}`},
+{t:"أضف Secrets في إعدادات الـ repo لـ keystore ومفاتيح API. لا تضعها داخل الملفات أبداً."}],
+quiz:{q:"ما ميزة GitHub Actions للمطوّر على الهاتف؟",opts:["يُوقّع التطبيق تلقائياً","يبني التطبيق على خوادم GitHub بدون استهلاك بيانات الهاتف","يرفع التطبيق لـ Play Store مباشرة","لا توجد ميزة فعلية"],ans:1,ex:"خوادم GitHub مجانية، قوية، وتملك Android SDK. أنت فقط تدفع كوداً وتحصل على APK — صفر استهلاك بيانات على هاتفك."}},
+
+// Path 0 — extra
+{p:0,t:"الذاكرة والسياق: كيف يتذكر النموذج",m:6,ic:"brain",
+body:[
+{h:"Context Window: الذاكرة المؤقتة"},
+{p:"النموذج لا يملك ذاكرة دائمة — يرى فقط ما في نافذة السياق الحالية. كل رسالة جديدة تُضاف للنافذة حتى تمتلئ، وعندها ينسى الأقدم. هذا يُفسّر لماذا يبدو النموذج «نسّاءً» في المحادثات الطويلة."},
+{t:"الحل: لخّص المحادثة الطويلة وابدأ محادثة جديدة بالملخص. هكذا تضغط السياق وتحافظ على المعلومات المهمة."},
+{h:"تقنيات إدارة السياق"},
+{l:["ابدأ بـ System Prompt يُخبر النموذج بكل ما يحتاجه","لخّص الإجابات الطويلة قبل المتابعة","احتفظ بملف 'context.md' لمشاريعك الكبيرة","استخدم Artifacts في Claude لحفظ الوثائق"]}],
+quiz:{q:"لماذا ينسى النموذج اللغوي ما قيل في بداية المحادثة الطويلة؟",opts:["لأنه كسول","لأن نافذة السياق محدودة وتحذف القديم عند الامتلاء","لأنه لا يهتم","بسبب بطء الخادم"],ans:1,ex:"Context Window محدودة بعدد معين من التوكن. عند الامتلاء، يُحذف أقدم المحتوى تلقائياً. تخطيط السياق جزء أساسي من العمل مع النماذج الكبيرة."}},
+
+{p:0,t:"Claude vs ChatGPT vs Gemini: مقارنة عملية",m:7,ic:"target",
+body:[
+{h:"كل نموذج له نقاط قوة"},
+{l:["Claude: أفضل في التحليل الطويل، الكود المعقد، وسياسات المحتوى المرنة","ChatGPT: أوسع انتشاراً، plugins كثيرة، DALL-E مدمج","Gemini: متكامل مع Google Workspace، Google Search في الوقت الحقيقي","Llama/Mistral: مفتوح المصدر، يعمل محلياً بدون إنترنت"]},
+{t:"لا تتزوج نموذجاً واحداً. المطوّر الذكي يختار الأداة حسب المهمة — Haiku للردود السريعة الرخيصة، Opus للتحليل العميق."},
+{p:"القاعدة: جرّب النموذج على مهمتك المحددة ولا تعتمد على المراجعات العامة. الأداء يختلف بشكل كبير حسب نوع المهمة."}],
+quiz:{q:"ما الاعتبار الأهم عند اختيار نموذج الذكاء الاصطناعي لتطبيقك؟",opts:["الأشهر والأكثر استخداماً","الأرخص سعراً دائماً","الأنسب لمهمتك المحددة من حيث الجودة والتكلفة والسرعة","الأحدث إصداراً"],ans:2,ex:"جودة الإخراج + التكلفة + السرعة + حدود المحتوى — هذه المعايير الأربعة تُحدد الخيار الصحيح. لا يوجد نموذج أفضل بشكل مطلق."}},
+
+// Path 1 — extra
+{p:1,t:"System Prompt: ابنِ مساعدك الخاص",m:8,ic:"spark",
+body:[
+{h:"ما هو الـ System Prompt؟"},
+{p:"رسالة النظام هي التعليمات الخفية التي تُحدد شخصية النموذج وحدوده وأسلوبه قبل أي محادثة. هي الفرق بين مساعد عام وخبير متخصص يعمل بأسلوبك تماماً."},
+{h:"مثال System Prompt قوي"},
+{c:`أنت مطوّر Android أول خبير، متخصص في Kotlin وJetpack Compose.
+قواعدك:
+• اكتب كوداً نظيفاً قابلاً للاختبار
+• استخدم MVVM وCoroutines دائماً
+• اشرح السبب الجذري قبل الحل
+• إذا لم تعرف، قل ذلك بوضوح
+• ردودك بالعربية والكود بالإنجليزية`},
+{t:"System Prompt جيد يوفّر عليك كتابة نفس التعليمات في كل رسالة. استثمر وقتك في بناؤه مرة واحدة."}],
+quiz:{q:"ما الفائدة الرئيسية من System Prompt في تطبيقاتك؟",opts:["تسريع الخادم","تخصيص شخصية ومعرفة النموذج لمهامك المحددة","تخفيض تكلفة API","لا فائدة فعلية"],ans:1,ex:"System Prompt يُحوّل نموذجاً عاماً إلى خبير متخصص. كل إجابة ستكون أدق وأكثر اتساقاً مع احتياجاتك."}},
+
+{p:1,t:"أوامر متعددة الخطوات ومسارات التفكير",m:9,ic:"zap",
+body:[
+{h:"مشكلة الطلب الكبير الواحد"},
+{p:"طلب 'اعمل كذا وكذا وكذا' يُضعف كل جزء. الحل: قسّم المهمة إلى خطوات وتعاون مع النموذج خطوة بخطوة. كل خطوة تصبح سياقاً للخطوة التالية."},
+{h:"نمط التعاون التدريجي"},
+{l:["الخطوة 1: «حلّل المشكلة وأخبرني ما المعلومات الناقصة»","الخطوة 2: «الآن اقترح 3 حلول مختلفة بإيجاز»","الخطوة 3: «طوّر الحل الثاني بالتفصيل»","الخطوة 4: «أعد المراجعة مع التركيز على الأداء»"]},
+{t:"هذا النهج التدريجي ينتج نتائج أعمق بكثير من طلب واحد كبير. الوقت الإضافي يستحق الجودة الأعلى."}],
+quiz:{q:"لماذا تقسيم المهمة لخطوات أفضل من طلبها كاملة دفعة واحدة؟",opts:["لأن النموذج أبطأ مع الطلبات الكبيرة","لأن كل خطوة تستفيد من نتيجة السابقة وتُنتج جودة أعلى","لتوفير التوكن فقط","لا فرق في النتيجة"],ans:1,ex:"التعاون التدريجي يُتيح لك توجيه النموذج في كل مرحلة وتصحيح المسار مبكراً بدل اكتشاف الخطأ في النهاية."}},
+
+// Path 2 — extra
+{p:2,t:"إدارة الحالة والبيانات في Vibe Coding",m:9,ic:"code",
+body:[
+{h:"الخطأ الشائع: بناء بلا معمارية"},
+{p:"الوصف يُنتج شاشات جميلة، لكن بدون بنية واضحة للبيانات تتحول لفوضى. قبل طلب أي شاشة، وضّح: أين تُخزَّن البيانات؟ من يُغيّرها؟ كيف تتدفق؟"},
+{h:"اطلب المعمارية أولاً"},
+{c:`"قبل كتابة أي كود، ارسم لي:
+1. نموذج البيانات (Data Classes)
+2. مصادر البيانات (Room / API / DataStore)
+3. الـ ViewModel لكل شاشة
+4. التدفق: UI → ViewModel → Repository → Source
+ثم ابدأ بالـ Repository."`},
+{t:"5 دقائق في تصميم المعمارية توفّر 5 ساعات من إعادة الكتابة لاحقاً."}],
+quiz:{q:"ما أول خطوة يجب طلبها من الذكاء الاصطناعي قبل بناء تطبيق جديد؟",opts:["تصميم واجهة جميلة","تصميم المعمارية ونموذج البيانات","كتابة أول Activity","اختيار الألوان"],ans:1,ex:"المعمارية الواضحة قبل البناء تمنع تراكم الديون التقنية. كل شاشة ستُبنى على أساس متين."}},
+
+{p:2,t:"من Figma إلى Compose: تحويل التصاميم",m:8,ic:"spark",
+body:[
+{h:"العملية في 3 خطوات"},
+{l:["صوّر أو صدّر شاشة Figma كصورة","أرسلها لـ Claude مع: «حوّل هذا التصميم إلى Jetpack Compose — استخدم Material3»","راجع الكود وعدّل الفوارق التي تراها"]},
+{p:"النتيجة ليست مثالية 100% لكنها توفّر 70-80% من وقت كتابة الـ UI. التعديلات الصغيرة أسرع من البناء من الصفر."},
+{t:"أضف في طلبك: 'استخدم الألوان من Material Theme، واجعل المكوّنات قابلة لإعادة الاستخدام (Composable functions منفصلة)'."}],
+quiz:{q:"ما أفضل طريقة للحصول على Compose كود من تصميم Figma؟",opts:["نسخ CSS من Figma يدوياً","إرسال صورة التصميم للذكاء الاصطناعي مع تعليمات واضحة","كتابته من الصفر يدوياً","شراء plugin باهظ الثمن"],ans:1,ex:"الذكاء الاصطناعي يفهم الصور ويترجمها لكود. ليس مثالياً لكنه يوفّر ساعات. التعديلات الصغيرة بعدها سريعة."}},
+
+// Path 3 — extra
+{p:3,t:"بناء RAG: اجعل الذكاء الاصطناعي يقرأ وثائقك",m:11,ic:"brain",
+body:[
+{h:"ما هو RAG؟"},
+{p:"Retrieval-Augmented Generation: بدلاً من تدريب نموذج جديد، تُغذّيه بوثائقك في وقت الاستفسار. يبحث في قاعدة معرفتك ثم يُجيب بناءً عليها. مثالي لـ: وثائق المنتج، قواعد المعرفة، دعم العملاء."},
+{h:"المكونات الأساسية"},
+{l:["Embedding: تحويل النص لمتجهات رقمية","Vector Database: Pinecone أو Supabase أو محلي","Retrieval: البحث عن أقرب المقاطع للسؤال","Generation: تمرير المقاطع للنموذج مع السؤال"]},
+{t:"للبداية السريعة: LlamaIndex أو LangChain تُبسّط بناء RAG كثيراً وتدعم Claude مباشرة."}],
+quiz:{q:"ما المشكلة التي يحلها RAG في تطبيقات الذكاء الاصطناعي؟",opts:["يُسرّع الخادم","يُتيح للنموذج الإجابة من وثائقك الخاصة لا من تدريبه فقط","يُخفّض تكلفة API","يُحسّن الترجمة"],ans:1,ex:"النماذج تُجيب من تدريبها فقط. RAG يُضيف طبقة بحث تُوفّر للنموذج معلوماتك الخاصة قبل الإجابة — بدون إعادة تدريب."}},
+
+{p:3,t:"إدارة التكاليف وتحسين استهلاك API",m:7,ic:"zap",
+body:[
+{h:"لماذا التكلفة مهمة جداً"},
+{p:"فرق بين claude-haiku-4-5 وclaude-opus بالتكلفة قد يكون 50 ضعفاً. تطبيق يخسر مالاً مع كل مستخدم ليس نموذجاً مستداماً."},
+{h:"استراتيجيات التحسين"},
+{l:["اختر النموذج الأصغر الكافي للمهمة: Haiku للردود البسيطة","خزّن النتائج (Cache) بدلاً من إعادة الطلب","حدّد max_tokens بدقة — لا تضع 4096 لكل طلب","Batch: اجمع طلبات متعددة في طلب واحد إن أمكن","Prompt Compression: قلّل حجم السياق المكرر"]},
+{t:"ابدأ دائماً بـ Haiku ثم ارتفع للأقوى فقط حين تثبت الحاجة. الاختلاف في الجودة أصغر مما تتوقع للمهام البسيطة."}],
+quiz:{q:"ما أسرع طريقة لتقليل تكلفة API في تطبيقك دون المساس بالجودة؟",opts:["رفع سعر الاشتراك","استخدام نموذج أصغر للمهام البسيطة وتخزين النتائج مؤقتاً","إيقاف الميزة","تقليل عدد المستخدمين"],ans:1,ex:"90% من الطلبات في معظم التطبيقات يمكن تخديمها بـ Haiku. Cache النتائج المتكررة يُخفّض الفواتير أكثر من أي تحسين آخر."}},
+
+// Path 4 — extra
+{p:4,t:"استراتيجية التسعير وFreemium",m:8,ic:"trend",
+body:[
+{h:"نماذج التسعير الشائعة"},
+{l:["Freemium: مجاني بحدود + اشتراك للكميات الأكبر","One-Time Purchase: دفع مرة واحدة — أصعب مع AI بسبب تكاليف التشغيل","Subscription: شهري أو سنوي — الأفضل للاستدامة","Pay-per-use: تدفع حسب الاستهلاك — مناسب للأدوات"]},
+{p:"مع تطبيقات الذكاء الاصطناعي، كل مستخدم له تكلفة تشغيل. Freemium يجب أن يكون مُصمَّماً بحيث المجاني لا يخسّرك."},
+{t:"القاعدة: حدّد تكلفة الاستخدام المجاني بدقة. إذا 10 مستخدمين مجانيين = تكلفة 1 مشترك، فأنت تحتاج معدل تحويل 10%. هل هذا واقعي؟"}],
+quiz:{q:"لماذا نموذج One-Time Purchase أصعب تطبيقه مع تطبيقات الذكاء الاصطناعي؟",opts:["لأن المستخدمين لا يحبونه","لأن تكاليف API الذكاء الاصطناعي مستمرة وتزداد مع المستخدمين","لأن Google لا تدعمه","لا يوجد سبب حقيقي"],ans:1,ex:"كل استفسار للمستخدم يكلّفك توكن. الدفع مرة واحدة لا يُغطي التكاليف المتزايدة. الاشتراك الشهري يتناسب مع بنية التكلفة المتكررة."}},
+
+{p:4,t:"قياس النجاح: مقاييس تطبيقات الذكاء الاصطناعي",m:7,ic:"chart",
+body:[
+{h:"ما تقيسه يصنع ما تبنيه"},
+{l:["DAU/MAU Ratio: نسبة المستخدمين اليوميين للشهريين — صحة التطبيق","Retention D1/D7/D30: هل يعودون؟ الأهم من أي مقياس","Completion Rate: كم يُكملون الإجراء المقصود؟","API Cost per User: التكلفة الفعلية لكل مستخدم","Conversion Rate: مجاني → مدفوع"]},
+{t:"Firebase Analytics + RevenueCat = كل ما تحتاجه لقياس تطبيق Android بدون بناء أي شيء من الصفر."},
+{p:"راجع هذه الأرقام أسبوعياً وليس شهرياً. الانخفاض المبكر في Retention D1 يعني مشكلة في تجربة أول استخدام — أسهل وأرخص في الإصلاح مبكراً."}],
+quiz:{q:"ما أهم مقياس يدل على أن تطبيقك حقق قيمة حقيقية للمستخدمين؟",opts:["عدد التنزيلات","Retention D30 (عودة المستخدم بعد 30 يوماً)","عدد التقييمات في المتجر","حجم التطبيق"],ans:1,ex:"التنزيل سهل، البقاء صعب. Retention D30 يقول أن المستخدم وجد سبباً حقيقياً للعودة — هذا هو التحقق الحقيقي من القيمة."}},
+
+// Path 5 — extra
+{p:5,t:"NotebookLM وبناء قاعدة معرفة شخصية",m:8,ic:"book",
+body:[
+{h:"ما هو NotebookLM؟"},
+{p:"NotebookLM من Google يسمح لك برفع وثائقك (PDF، مقالات، ملاحظات) ثم الدردشة معها. يُعطيك مراجع دقيقة لكل إجابة. مثالي للبحث وتنظيم المعرفة."},
+{h:"استخدامات عملية للمطوّر"},
+{l:["رفع وثائق SDK والدردشة معها بدل قراءتها كاملة","تحليل متطلبات المشروع واستخراج المهام","تلخيص محادثات GitHub الطويلة","بناء قاعدة معرفة لتطبيقاتك وردود على أسئلة المستخدمين"]},
+{t:"Obsidian + Claude Plugin = قاعدة معرفة شخصية قوية. دوّن كل شيء مهم وابدأ البحث فيه بالذكاء الاصطناعي لاحقاً."}],
+quiz:{q:"ما الفرق الجوهري بين NotebookLM والدردشة العادية مع Claude؟",opts:["NotebookLM أذكى","NotebookLM يُجيب فقط من وثائقك المرفوعة مع مراجع دقيقة","NotebookLM مجاني تماماً","لا فرق"],ans:1,ex:"Claude يُجيب من تدريبه. NotebookLM يُقيّد إجاباته على وثائقك فقط ويُشير للمصدر الدقيق. أقل إبداعاً لكن أكثر دقة لمحتواك الخاص."}},
+
+{p:5,t:"بناء سير عمل الذكاء الاصطناعي الشخصي",m:10,ic:"tool",
+body:[
+{h:"النظام الشخصي القوي"},
+{p:"الفرق بين من يستخدم الذكاء الاصطناعي أحياناً ومن يُضاعف إنتاجيته هو وجود نظام شخصي ثابت: أدوات محددة لمهام محددة، وقوالب جاهزة، وعادة يومية."},
+{h:"بنِ نظامك الخاص"},
+{l:["الصباح: Morning Briefing بـ Claude — ما أهم 3 مهام اليوم؟","أثناء العمل: Cursor للكود، Claude للتفكير والتحليل","المساء: لخّص ما تعلّمته وحفظه في Obsidian","الأسبوعي: راجع تقدّمك واسأل: ما يمكن أتمتته؟"]},
+{t:"الهدف ليس استخدام كل الأدوات — بل بناء روتين ثابت تتقنه وتطوّره تدريجياً."}],
+quiz:{q:"ما الفرق بين مستخدم عادي للذكاء الاصطناعي ومن يُضاعف إنتاجيته فعلاً؟",opts:["يستخدم نماذج أغلى","يمتلك نظاماً شخصياً ثابتاً مع أدوات وعادات محددة","يعمل أكثر ساعات","لا فرق حقيقي"],ans:1,ex:"الأداة وحدها لا تكفي. النظام الشخصي — متى تستخدم ماذا وكيف — هو ما يُحوّل الاستخدام العشوائي إلى تضاعف حقيقي في الإنتاجية."}}
+];
+
+const ACHIEVEMENTS=[
+{id:"a1",t:"الخطوة الأولى",d:"أكمل أول درس",ic:"star",f:s=>nd(s)>=1},
+{id:"a2",t:"متعلم نشط",d:"أكمل 5 دروس",ic:"book",f:s=>nd(s)>=5},
+{id:"a3",t:"أتقنت المسار",d:"أكمل مساراً كاملاً",ic:"route",f:s=>PATHS.some((_,k)=>pc(s,k)===L.filter(x=>x.p===k).length)},
+{id:"a4",t:"100 نقطة",d:"اجمع 100 XP",ic:"zap",f:s=>xp(s)>=100},
+{id:"a5",t:"ثلاثة أيام",d:"تعلّم 3 أيام متتالية",ic:"flame",f:s=>streak(s)>=3},
+{id:"a6",t:"سيد النيل",d:"أكمل كل الدروس",ic:"trophy",f:s=>nd(s)===L.length},
+{id:"a7",t:"مبرمج Vibe",d:"أكمل مسار Vibe Coding",ic:"code",f:s=>pc(s,2)===L.filter(x=>x.p===2).length},
+{id:"a8",t:"خبير الأوامر",d:"أكمل مسار هندسة الأوامر",ic:"target",f:s=>pc(s,1)===L.filter(x=>x.p===1).length}];
+
+const K="ainile.v2";
+let S={done:{},days:{},goal:2,theme:"auto",notif:false,ach:{}};
+try{S=Object.assign(S,JSON.parse(localStorage.getItem(K)||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const nd=s=>Object.keys(s.done).length;
+const xp=s=>nd(s)*20;
+const pc=(s,p)=>L.filter((l,i)=>l.p===p&&s.done[i]).length;
+const dk=d=>d.toISOString().slice(0,10);
+function streak(s){let c=0,d=new Date();if(!s.days[dk(d)])d.setDate(d.getDate()-1);while(s.days[dk(d)]){c++;d.setDate(d.getDate()-1)}return c}
+function applyTheme(){const r=document.documentElement;S.theme==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",S.theme)}
+
+let tab="lessons";
+const TABS=[["lessons","الدروس","book"],["paths","المسارات","route"],["stats","الإحصائيات","chart"],["ach","الإنجازات","trophy"],["set","الإعدادات","set"]];
+const wave=pct=>{const y=100-Math.min(92,8+pct*0.84);return `<svg class="wv" viewBox="0 0 400 180" preserveAspectRatio="none"><g transform="translate(0,${y*1.4-40})"><path fill="#27b5a3" fill-opacity=".35" d="M0 20q50-26 100 0t100 0 100 0 100 0 100 0 100 0V200H0z"/></g><g transform="translate(0,${y*1.4-28})"><path fill="#e6b450" fill-opacity=".22" d="M0 20q50 22 100 0t100 0 100 0 100 0 100 0 100 0V200H0z" style="animation-duration:11s"/></g></svg>`};
+const lcard=(l,i)=>`<button class="card${S.done[i]?" done":""}" onclick="openL(${i})"><span class="ico">${ic(S.done[i]?"check":l.ic)}</span><span class="t"><b>${l.t}</b><span>${l.m} دقائق · 20 XP</span></span>${ic("back")}</button>`;
+
+function render(){
+  document.getElementById("sk").textContent=streak(S);
+  document.getElementById("nav").innerHTML=TABS.map(([k,t,i])=>`<button class="${tab===k?"on":""}" onclick="go('${k}')">${ic(i)}${t}</button>`).join("");
+  const m=document.getElementById("main");let h="";
+  if(tab==="lessons"){
+    const nx=L.findIndex((l,i)=>!S.done[i]);const lv=Math.floor(xp(S)/100)+1,pr=xp(S)%100;
+    h=`<div class="hero">${wave(pr)}<small>المستوى ${lv} · منسوب النيل ${pr}%</small><h2>${nx<0?"أنجزت كل الدروس! 🎉":"تابع رحلتك مع الذكاء الاصطناعي"}</h2>${nx<0?"":`<button class="btn" onclick="openL(${nx})">${ic("book")}${L[nx].t}</button>`}</div>`;
+    PATHS.forEach((_,k)=>{const ls=L.filter((l,i)=>l.p===k);if(ls.length){h+=`<h3>${PATHS[k].t}</h3>`;ls.forEach((l,j)=>h+=lcard(l,L.indexOf(l)))}});
+  }else if(tab==="paths"){
+    h=PATHS.map((p,k)=>{const ls=L.filter((l,i)=>l.p===k),c=pc(S,k),t=ls.length;return `<div class="card" style="display:block;margin-bottom:10px" onclick="go('lessons')"><div style="display:flex;gap:11px;align-items:center"><span class="ico go">${ic(p.ic)}</span><span class="t"><b>${p.t}</b><span>${p.d}</span></span><b style="color:var(--ac);font-weight:700">${c}/${t}</b></div><div class="bar"><i style="width:${c/t*100}%"></i></div></div>`}).join("");
+  }else if(tab==="stats"){
+    const td=S.days[dk(new Date())]||0,g=S.goal,C=2*Math.PI*34,pct=Math.min(1,td/g);
+    let bars="";for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const v=S.days[dk(d)]||0;bars+=`<div style="flex:1;text-align:center"><div style="height:72px;display:flex;align-items:flex-end;padding:0 2px"><div style="width:100%;border-radius:7px;background:${v?"var(--ac)":"var(--s2)"};height:${Math.max(10,Math.min(100,v*30))}%;transition:.4s"></div></div><span class="muted" style="font-size:11px">${["ح","ن","ث","ر","خ","ج","س"][d.getDay()]}</span></div>`}
+    h=`<div class="card"><svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="34" fill="none" stroke="var(--s2)" stroke-width="8"/><circle cx="40" cy="40" r="34" fill="none" stroke="var(--go)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" transform="rotate(-90 40 40)"/><text x="40" y="45" text-anchor="middle" fill="var(--tx)" font-size="17" font-weight="700">${td}/${g}</text></svg><span class="t"><b>هدف اليوم</b><span>${td>=g?"✅ حققت هدفك":"أكمل "+(g-td)+" درس"}</span></span></div>
+    <div class="grid2"><div class="stat">${ic("zap")}<b>${xp(S)}</b><span>نقاط الخبرة</span></div><div class="stat">${ic("flame")}<b>${streak(S)}</b><span>أيام متتالية</span></div><div class="stat">${ic("book")}<b>${nd(S)}/${L.length}</b><span>دروس مكتملة</span></div><div class="stat">${ic("clock")}<b>${L.reduce((a,l,i)=>a+(S.done[i]?l.m:0),0)}</b><span>دقيقة تعلّم</span></div></div>
+    <h3>آخر 7 أيام</h3><div class="stat" style="display:flex;gap:4px">${bars}</div>`;
+  }else if(tab==="ach"){
+    h=`<p class="muted" style="margin-bottom:10px">${Object.keys(S.ach).length} من ${ACHIEVEMENTS.length} إنجازات</p><div class="grid2">`+ACHIEVEMENTS.map(a=>{const o=S.ach[a.id];return `<div class="badge ${o?"on":"off"}"><span class="ico">${ic(o?a.ic:"x")}</span><b>${a.t}</b><span>${a.d}</span></div>`}).join("")+"</div>";
+  }else{
+    h=`<h3 style="margin-top:4px">المظهر</h3><div class="row"><span class="ico">${ic("moon")}</span><span class="t"><b>السمة</b></span><div class="seg">${[["auto","تلقائي"],["dark","داكن"],["light","فاتح"]].map(([v,t])=>`<button class="${S.theme===v?"on":""}" onclick="S.theme='${v}';save();applyTheme();render()">${t}</button>`).join("")}</div></div>
+    <h3>التعلّم</h3><div class="row"><span class="ico">${ic("target")}</span><span class="t"><b>الهدف اليومي</b><span>عدد الدروس في اليوم</span></span><div class="seg">${[1,2,3,5].map(v=>`<button class="${S.goal===v?"on":""}" onclick="S.goal=${v};save();render()">${v}</button>`).join("")}</div></div>
+    <div class="row"><span class="ico">${ic("bell")}</span><span class="t"><b>تذكير يومي</b></span><button class="sw ${S.notif?"on":""}" onclick="S.notif=!S.notif;save();render()"></button></div>
+    <h3>البيانات</h3><button class="row" style="width:100%;color:#ff8a80" onclick="if(confirm('سيتم حذف تقدمك بالكامل. متأكد؟')){S.done={};S.days={};S.ach={};save();render()}"><span class="ico" style="color:#ff8a80">${ic("trash")}</span><span class="t" style="text-align:right"><b>إعادة ضبط التقدم</b><span>حذف الدروس والإنجازات</span></span></button>`;
+  }
+  m.innerHTML=h;
+}
+function go(k){tab=k;render();document.getElementById("main").scrollTop=0}
+
+// Lesson page
+let curL=-1,selOpt=null,qDone=false;
+function renderBody(l){
+  let h="";
+  l.body.forEach(s=>{
+    if(s.h)h+=`<h2 class="ls-h">${s.h}</h2>`;
+    else if(s.p)h+=`<p class="ls-p">${s.p}</p>`;
+    else if(s.t)h+=`<div class="ls-tip">${ic("star")}<span>${s.t}</span></div>`;
+    else if(s.l)h+=`<ul class="ls-list">${s.l.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+    else if(s.c)h+=`<div class="ls-code">${s.c.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>`;
+  });
+  if(l.quiz){
+    const ALPHA=["أ","ب","ج","د"];
+    h+=`<div class="quiz"><h4>${ic("spark")} اختبر فهمك</h4><p class="ls-p" style="margin-bottom:14px">${l.quiz.q}</p>`;
+    l.quiz.opts.forEach((o,k)=>h+=`<button class="qopt" id="qo${k}" onclick="selQ(${k})"><span class="qn">${ALPHA[k]}</span><span>${o}</span></button>`);
+    h+=`<div id="qfb" class="qfb"></div><button class="btn ac full" style="margin-top:12px" onclick="checkQ()">تحقق من إجابتي</button></div>`;
+  }
+  return h;
+}
+function openL(i){
+  curL=i;selOpt=null;qDone=false;
+  const l=L[i];
+  const pathLessons=L.map((x,j)=>({...x,j})).filter(x=>x.p===l.p);
+  const pos=pathLessons.findIndex(x=>x.j===i)+1;
+  document.getElementById("lptitle").textContent=l.t;
+  document.getElementById("lpnum").textContent=`${pos}/${pathLessons.length}`;
+  document.getElementById("lprogi").style.width=`${(pos/pathLessons.length)*100}%`;
+  document.getElementById("lbody").innerHTML=renderBody(l);
+  document.getElementById("lcomplete").innerHTML=S.done[i]
+    ?`<button class="btn full" style="opacity:.6" disabled>${ic("check")} مكتمل`
+    :`<button class="btn full" onclick="finish(${i})">${ic("check")} أكملت الدرس (+20 XP)</button>`;
+  document.getElementById("lp").classList.add("on");
+  document.getElementById("lbody").scrollTop=0;
+}
+function closeLP(){document.getElementById("lp").classList.remove("on");render()}
+function selQ(k){
+  if(qDone)return;
+  selOpt=k;
+  document.querySelectorAll(".qopt").forEach((el,j)=>{el.className="qopt"+(j===k?" sel":"")});
+}
+function checkQ(){
+  if(qDone)return;
+  if(selOpt===null){document.getElementById("qfb").className="qfb err";document.getElementById("qfb").textContent="اختر إجابة أولاً ثم اضغط تحقق.";return}
+  const l=L[curL];qDone=true;
+  const ok=selOpt===l.quiz.ans;
+  document.querySelectorAll(".qopt").forEach((el,j)=>{
+    el.className="qopt"+(j===l.quiz.ans?" ok":(j===selOpt?" err":""));
+  });
+  const fb=document.getElementById("qfb");
+  fb.className="qfb "+(ok?"ok":"err");
+  fb.textContent=(ok?"✅ ممتاز! ":"❌ ليست الإجابة الصحيحة. ")+l.quiz.ex;
+}
+function finish(i){
+  S.done[i]=1;const k=dk(new Date());S.days[k]=(S.days[k]||0)+1;
+  let nw=[];
+  ACHIEVEMENTS.forEach(a=>{if(!S.ach[a.id]&&a.f(S)){S.ach[a.id]=1;nw.push(a.t)}});
+  save();
+  document.getElementById("lcomplete").innerHTML=`<button class="btn full" style="opacity:.6" disabled>${ic("check")} مكتمل</button>`;
+  if(nw.length)setTimeout(()=>toast("إنجاز جديد: "+nw[0]),400);
+}
+function toast(t){const e=document.getElementById("toast");e.innerHTML=ic("trophy")+"<span>"+t+"</span>";e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2800)}
+
+const APPS=[["وتين","لياقة وتغذية بالعربية مع رفيق الذكي","heart"],["نور","رفيقك الإسلامي اليومي","moon"],["Kairos","تركيز وإنتاجية","target"],["Rosiva","الجمال والعناية بالذكاء الاصطناعي","spark"]];
+document.getElementById("mb").onclick=()=>{document.getElementById("drawer").classList.add("on");document.getElementById("scrim").classList.add("on");document.getElementById("scrim").onclick=closeAll};
+document.getElementById("drawer").innerHTML=`<div class="logo"><span class="ico" style="background:var(--hero);color:var(--go)">${ic("spark")}</span><div><b style="font-size:19px">AI Nile</b><p class="muted">تعلّم الذكاء الاصطناعي بالعربية</p></div></div>
+<h3>عن التطبيق</h3><div class="row" style="align-items:flex-start"><span class="ico">${ic("info")}</span><span class="t">رفيقك العربي لتعلّم الذكاء الاصطناعي وVibe Coding: ${L.length} درساً، ${PATHS.length} مسارات، وإنجازات تحفّزك كل يوم.<span>الإصدار 2.0</span></span></div>
+<h3>تطبيقات أخرى من المطوّر</h3>`+APPS.map(a=>`<div class="row"><span class="ico go">${ic(a[2])}</span><span class="t"><b>${a[0]}</b><span>${a[1]}</span></span></div>`).join("")+`<p class="muted" style="margin-top:14px">علي القاسم · صُنع بشغف 🌊</p>`;
+function closeAll(){document.getElementById("drawer").classList.remove("on");document.getElementById("scrim").classList.remove("on")}
+applyTheme();render();
+</script>
+</body>
+</html>
