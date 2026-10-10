@@ -46,30 +46,63 @@ jobs:
         run: |
           sudo apt-get install -y imagemagick
 
-          # توليد جميع أحجام PNG
-          declare -A sizes=(
+          # إزالة الشفافية وملء الخلفية بلون الأيقونة الأصلي
+          convert icon.png \
+            -background "#0d1464" \
+            -alpha remove -alpha off \
+            icon_full.png
+
+          # ── Legacy icons (API < 26) ───────────────────────────
+          declare -A legacy=(
             ["mipmap-mdpi"]=48
             ["mipmap-hdpi"]=72
             ["mipmap-xhdpi"]=96
             ["mipmap-xxhdpi"]=144
             ["mipmap-xxxhdpi"]=192
           )
-          for dir in "${!sizes[@]}"; do
-            size=${sizes[$dir]}
+          for dir in "${!legacy[@]}"; do
+            size=${legacy[$dir]}
             mkdir -p android/app/src/main/res/$dir
-            convert icon.png -resize ${size}x${size} \
+            convert icon_full.png -resize ${size}x${size} \
               android/app/src/main/res/$dir/ic_launcher.png
-            convert icon.png -resize ${size}x${size} \
+            convert icon_full.png -resize ${size}x${size} \
               android/app/src/main/res/$dir/ic_launcher_round.png
           done
 
-          # حذف Adaptive Icons حتى يستخدم Android ملفات PNG مباشرة
-          rm -rf android/app/src/main/res/mipmap-anydpi-v26/
-          rm -f  android/app/src/main/res/drawable/ic_launcher_foreground.xml
-          rm -f  android/app/src/main/res/drawable/ic_launcher_background.xml
+          # ── Adaptive icon foreground (API 26+) ────────────────
+          mkdir -p android/app/src/main/res/drawable
+          convert icon_full.png -resize 432x432 \
+            android/app/src/main/res/drawable/ic_launcher_foreground.png
+
+          # ── Adaptive icon background color ────────────────────
+          mkdir -p android/app/src/main/res/values
+          cat > android/app/src/main/res/values/ic_launcher_background.xml << 'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="ic_launcher_background">#0d1464</color>
+          </resources>
+          XML
+
+          # ── Adaptive icon XMLs ────────────────────────────────
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+          cat > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml << 'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@color/ic_launcher_background"/>
+              <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+          </adaptive-icon>
+          XML
+
+          cp android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
+             android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+
+          # ── حذف الـ XML القديمة التي تحجب أيقونتنا ───────────
+          rm -f android/app/src/main/res/drawable/ic_launcher_foreground.xml
+          rm -f android/app/src/main/res/drawable/ic_launcher_background.xml
 
           echo "✓ Icons done"
           ls android/app/src/main/res/mipmap-xxhdpi/
+          ls android/app/src/main/res/mipmap-anydpi-v26/
 
       # ── رقم الإصدار ───────────────────────────────────────────
       - name: Set version
