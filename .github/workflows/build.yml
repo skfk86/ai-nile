@@ -41,56 +41,59 @@ jobs:
       - name: Sync web assets
         run: npx cap sync android
 
+      # ── AdMob: أضف App ID في AndroidManifest ────────────────
+      - name: Inject AdMob App ID
+        env:
+          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
+        run: |
+          # استخدم الـ ID الحقيقي من Secrets، أو Test ID كافتراضي
+          APP_ID="${ADMOB_APP_ID:-ca-app-pub-3940256099942544~3347511713}"
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          # أضف meta-data قبل </application>
+          sed -i "s|</application>|    <meta-data\n            android:name=\"com.google.android.gms.ads.APPLICATION_ID\"\n            android:value=\"${APP_ID}\"/>\n    </application>|" "$MANIFEST"
+          echo "✓ AdMob App ID injected: $APP_ID"
+
       # ── أيقونة التطبيق ────────────────────────────────────────
       - name: Generate app icons
         run: |
           sudo apt-get install -y imagemagick
 
-          convert icon.png \
-            -background "#0d1464" \
-            -alpha remove -alpha off \
-            icon_full.png
+          # إنشاء نسخة بدون شفافية
+          convert icon.png -background "#0d1464" -alpha remove -alpha off icon_full.png
 
-          declare -A legacy=(
-            ["mipmap-mdpi"]=48   ["mipmap-hdpi"]=72
-            ["mipmap-xhdpi"]=96  ["mipmap-xxhdpi"]=144
-            ["mipmap-xxxhdpi"]=192
-          )
-          for dir in "${!legacy[@]}"; do
-            size=${legacy[$dir]}
-            mkdir -p android/app/src/main/res/$dir
-            convert icon_full.png -resize ${size}x${size} \
-              android/app/src/main/res/$dir/ic_launcher.png
-            convert icon_full.png -resize ${size}x${size} \
-              android/app/src/main/res/$dir/ic_launcher_round.png
+          # حذف الأيقونات الافتراضية (Capacitor 6 يستخدم WEBP)
+          find android/app/src/main/res -name "ic_launcher*" -delete
+          find android/app/src/main/res -name "*.webp" -delete
+          echo "✓ Default icons removed"
+
+          # توليد PNG لكل الأحجام
+          for entry in "mipmap-mdpi:48" "mipmap-hdpi:72" "mipmap-xhdpi:96" "mipmap-xxhdpi:144" "mipmap-xxxhdpi:192"; do
+            dir="${entry%%:*}"
+            size="${entry##*:}"
+            mkdir -p "android/app/src/main/res/$dir"
+            convert icon_full.png -resize "${size}x${size}" "android/app/src/main/res/$dir/ic_launcher.png"
+            convert icon_full.png -resize "${size}x${size}" "android/app/src/main/res/$dir/ic_launcher_round.png"
+            echo "  ✓ $dir: ${size}px"
           done
 
+          # Foreground للـ Adaptive Icon
           mkdir -p android/app/src/main/res/drawable
-          convert icon_full.png -resize 432x432 \
-            android/app/src/main/res/drawable/ic_launcher_foreground.png
+          convert icon_full.png -resize 432x432 android/app/src/main/res/drawable/ic_launcher_foreground.png
 
+          # Background XML
           mkdir -p android/app/src/main/res/values
-          cat > android/app/src/main/res/values/ic_launcher_background.xml << 'XML'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <color name="ic_launcher_background">#0d1464</color>
-          </resources>
-          XML
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#0d1464</color>\n</resources>\n' \
+            > android/app/src/main/res/values/ic_launcher_background.xml
 
+          # Adaptive Icon XML
           mkdir -p android/app/src/main/res/mipmap-anydpi-v26
-          cat > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml << 'XML'
-          <?xml version="1.0" encoding="utf-8"?>
-          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-              <background android:drawable="@color/ic_launcher_background"/>
-              <foreground android:drawable="@drawable/ic_launcher_foreground"/>
-          </adaptive-icon>
-          XML
+          printf '<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n    <background android:drawable="@color/ic_launcher_background"/>\n    <foreground android:drawable="@drawable/ic_launcher_foreground"/>\n</adaptive-icon>\n' \
+            > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           cp android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
              android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
 
-          rm -f android/app/src/main/res/drawable/ic_launcher_foreground.xml
-          rm -f android/app/src/main/res/drawable/ic_launcher_background.xml
           echo "✓ Icons done"
+          ls android/app/src/main/res/mipmap-xxhdpi/
 
       # ── رقم الإصدار التلقائي ──────────────────────────────────
       - name: Set version
@@ -104,11 +107,14 @@ jobs:
           echo "▶ $VERSION_NAME ($VERSION_CODE)"
 
       # ── targetSdk 36 ─────────────────────────────────────────
-      - name: Set API 36
+      - name: Set API levels
         run: |
-          sed -i "s/compileSdk .*/compileSdk 36/" android/app/build.gradle
-          sed -i "s/targetSdk .*/targetSdk 36/"   android/app/build.gradle
-          grep -E "compileSdk|targetSdk|versionCode|versionName" android/app/build.gradle
+          sed -i "s/compileSdk .*/compileSdk 36/"       android/app/build.gradle
+          sed -i "s/targetSdk .*/targetSdk 36/"         android/app/build.gradle
+          sed -i "s/minSdk .*/minSdk 24/"               android/app/build.gradle
+          sed -i "s/minSdkVersion .*/minSdkVersion 24/" android/app/build.gradle
+          grep -E "compileSdk|targetSdk|minSdk|versionCode|versionName" android/app/build.gradle
+          echo "▶ minSdk=24 targetSdk=36 compileSdk=36"
 
       # ── Gradle cache ─────────────────────────────────────────
       - name: Cache Gradle
