@@ -846,9 +846,19 @@ const ACHIEVEMENTS=[
 {id:"a8",t:"خبير الأوامر",d:"أكمل مسار هندسة الأوامر",ic:"target",f:s=>pc(s,1)===L.filter(x=>x.p===1).length}];
 
 const K="ainile.v2";
+const NOTIF_STORAGE_KEY="ainile_notif_8am";
 let S={done:{},days:{},goal:2,theme:"auto",notif:false,ach:{}};
-try{S=Object.assign(S,JSON.parse(localStorage.getItem(K)||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+try{
+  S=Object.assign(S,JSON.parse(localStorage.getItem(K)||"{}"));
+  const storedNotif=localStorage.getItem(NOTIF_STORAGE_KEY);
+  if(storedNotif!==null){S.notif=storedNotif==="true"}
+}catch(e){}
+const save=()=>{
+  try{
+    localStorage.setItem(K,JSON.stringify(S));
+    localStorage.setItem(NOTIF_STORAGE_KEY,S.notif?"true":"false");
+  }catch(e){}
+};
 const nd=s=>Object.keys(s.done).length;
 const xp=s=>nd(s)*20;
 const pc=(s,p)=>L.filter((l,i)=>l.p===p&&s.done[i]).length;
@@ -891,7 +901,7 @@ function render(){
   }else{
     h=`<h3 style="margin-top:4px">المظهر</h3><div class="row"><span class="ico">${ic("moon")}</span><span class="t"><b>السمة</b></span><div class="seg">${[["auto","تلقائي"],["dark","داكن"],["light","فاتح"]].map(([v,t])=>`<button class="${S.theme===v?"on":""}" onclick="S.theme='${v}';save();applyTheme();render()">${t}</button>`).join("")}</div></div>
     <h3>التعلّم</h3><div class="row"><span class="ico">${ic("target")}</span><span class="t"><b>الهدف اليومي</b><span>عدد الدروس في اليوم</span></span><div class="seg">${[1,2,3,5].map(v=>`<button class="${S.goal===v?"on":""}" onclick="S.goal=${v};save();render()">${v}</button>`).join("")}</div></div>
-    <div class="row"><span class="ico">${ic("bell")}</span><span class="t"><b>تذكير يومي</b></span><button class="sw ${S.notif?"on":""}" onclick="S.notif=!S.notif;save();render()"></button></div>
+    <div class="row"><span class="ico">${ic("bell")}</span><span class="t"><b>تذكير يومي بالتعلم</b><span>تذكير كل يوم الساعة 8:00 صباحاً</span></span><button class="sw ${S.notif?"on":""}" onclick="toggleDailyNotification()" aria-label="تفعيل أو تعطيل التذكير اليومي"></button></div>
     <h3>البيانات</h3><button class="row" style="width:100%;color:#ff8a80" onclick="if(confirm('سيتم حذف تقدمك بالكامل. متأكد؟')){S.done={};S.days={};S.ach={};save();render()}"><span class="ico" style="color:#ff8a80">${ic("trash")}</span><span class="t" style="text-align:right"><b>إعادة ضبط التقدم</b><span>حذف الدروس والإنجازات</span></span></button>`;
   }
   m.innerHTML=h;
@@ -1030,7 +1040,189 @@ async function maybeInterstitial() {
   } catch(e) { console.log('Interstitial:', e); }
 }
 
-applyTheme();render();initAdMob();
+// ══════════════════════════════════════════════════════════
+// نظام الإشعارات والتذكير اليومي (الساعة 8:00 صباحاً)
+// ══════════════════════════════════════════════════════════
+
+let _dailyNotifTimer = null;
+
+function localNotificationsPlugin() {
+  if (typeof Capacitor === 'undefined') return null;
+  if (!Capacitor.isNativePlatform()) return null;
+  return Capacitor.Plugins?.LocalNotifications || null;
+}
+
+// جدولة إشعار أندرويد الأصلي عبر Capacitor
+async function scheduleCapacitorDailyNotification(ln) {
+  try {
+    await ln.createChannel({
+      id: 'daily_learning_reminder',
+      name: 'تذكير التعلّم اليومي',
+      description: 'إشعار يومي يذكّرك بمتابعة دروسك في AI Nile',
+      importance: 4,
+      visibility: 1
+    });
+  } catch(e) {
+    console.log('Channel creation:', e);
+  }
+
+  try {
+    await ln.cancel({ notifications: [{ id: 800 }] });
+  } catch(e) {}
+
+  try {
+    await ln.schedule({
+      notifications: [
+        {
+          id: 800,
+          title: 'حان وقت التعلّم! 🚀',
+          body: 'صباح الخير! 8:00 صباحاً — خصّص 5 دقائق اليوم لتطوير مهاراتك في الذكاء الاصطناعي مع AI Nile 🌊',
+          channelId: 'daily_learning_reminder',
+          schedule: {
+            on: { hour: 8, minute: 0 },
+            repeats: true,
+            allowWhileIdle: true
+          },
+          smallIcon: 'ic_launcher',
+          iconColor: '#27b5a3'
+        }
+      ]
+    });
+  } catch(e) {
+    console.log('Capacitor schedule error:', e);
+  }
+}
+
+// جدولة التذكير في بيئة الويب والمتصفحات
+function scheduleWebDailyNotification() {
+  if (_dailyNotifTimer) {
+    clearTimeout(_dailyNotifTimer);
+    _dailyNotifTimer = null;
+  }
+  if (!S.notif) return;
+
+  const now = new Date();
+  const next8 = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0, 0, 0);
+  if (now.getTime() >= next8.getTime()) {
+    next8.setDate(next8.getDate() + 1);
+  }
+  const delay = next8.getTime() - now.getTime();
+
+  _dailyNotifTimer = setTimeout(() => {
+    fireDailyNotification();
+    scheduleWebDailyNotification();
+  }, delay);
+}
+
+// إظهار إشعار التذكير اليومي
+function fireDailyNotification() {
+  if (!S.notif) return;
+  const title = 'حان وقت التعلّم! 🚀';
+  const body = 'صباح الخير! 8:00 صباحاً — خصّص 5 دقائق اليوم لتطوير مهاراتك في الذكاء الاصطناعي مع AI Nile 🌊';
+
+  localStorage.setItem('ainile_last_notif_date', dk(new Date()));
+
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    try {
+      const notif = new Notification(title, {
+        body: body,
+        icon: 'icon.png',
+        badge: 'icon.png',
+        tag: 'ai-nile-8am-reminder'
+      });
+      notif.onclick = () => {
+        window.focus();
+        notif.close();
+      };
+      return;
+    } catch(e) {
+      console.log('Web Notification error:', e);
+    }
+  }
+  toast('🔔 ' + title + ': ' + body);
+}
+
+// تفعيل أو إلغاء تفعيل التذكير اليومي من الإعدادات
+async function toggleDailyNotification() {
+  if (!S.notif) {
+    const ln = localNotificationsPlugin();
+    if (ln) {
+      try {
+        const perm = await ln.requestPermissions();
+        if (perm.display !== 'granted') {
+          toast('يرجى منح إذن الإشعارات من إعدادات الهاتف');
+          return;
+        }
+        await scheduleCapacitorDailyNotification(ln);
+      } catch(e) {
+        console.log('Capacitor notification error:', e);
+      }
+    } else if (typeof Notification !== 'undefined') {
+      if (Notification.permission === 'default') {
+        const res = await Notification.requestPermission();
+        if (res !== 'granted') {
+          toast('يرجى السماح بالإشعارات لتفعيل التذكير');
+          return;
+        }
+      } else if (Notification.permission === 'denied') {
+        alert('الإشعارات محظورة في المتصفح. يرجى تفعيلها من إعدادات الموقع.');
+        return;
+      }
+    }
+
+    S.notif = true;
+    save();
+    render();
+    scheduleWebDailyNotification();
+    toast('تم تفعيل التذكير اليومي (الساعة 8:00 ص) 🔔');
+  } else {
+    const ln = localNotificationsPlugin();
+    if (ln) {
+      try {
+        await ln.cancel({ notifications: [{ id: 800 }] });
+      } catch(e) {}
+    }
+    if (_dailyNotifTimer) {
+      clearTimeout(_dailyNotifTimer);
+      _dailyNotifTimer = null;
+    }
+
+    S.notif = false;
+    save();
+    render();
+    toast('تم تعطيل التذكير اليومي');
+  }
+}
+
+// تهيئة نظام الإشعارات عند إقلاع التطبيق
+async function initNotifications() {
+  if (!S.notif) return;
+
+  const ln = localNotificationsPlugin();
+  if (ln) {
+    try {
+      const perm = await ln.checkPermissions();
+      if (perm.display === 'granted') {
+        await scheduleCapacitorDailyNotification(ln);
+      }
+    } catch(e) {}
+  }
+
+  scheduleWebDailyNotification();
+
+  // تذكير لطيف عند فتح التطبيق في الصباح بعد الساعة 8 إذا لم يتم إنجاز درس اليوم بعد
+  const todayKey = dk(new Date());
+  const lastShown = localStorage.getItem('ainile_last_notif_date');
+  const nowHour = new Date().getHours();
+  if (nowHour >= 8 && nowHour < 12 && lastShown !== todayKey && (S.days[todayKey] || 0) === 0) {
+    localStorage.setItem('ainile_last_notif_date', todayKey);
+    setTimeout(() => {
+      toast('صباح الخير! حان وقت درس اليوم في AI Nile 🌊');
+    }, 1500);
+  }
+}
+
+applyTheme();render();initAdMob();initNotifications();
 
 // إخفاء شاشة البداية
 (function(){
